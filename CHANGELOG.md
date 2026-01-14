@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.1.2] - 2026-14-01
+
+### Fixed
+- Fixed invalid path error for dedicated servers trying to get ModConfig.xml
+
 ## [2.1.1] - 2025-12-20
 
 ### Fixed
@@ -165,6 +170,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 
 [unreleased]: https://github.com/tmenant/7D2D-efficient-base-repair/compare/master...unreleased
+[2.1.2]: https://github.com/tmenant/7D2D-efficient-base-repair/compare/2.1.1...2.1.2
 [2.1.1]: https://github.com/tmenant/7D2D-efficient-base-repair/compare/2.1.0...2.1.1
 [2.1.0]: https://github.com/tmenant/7D2D-efficient-base-repair/compare/2.0.2...2.1.0
 [2.0.2]: https://github.com/tmenant/7D2D-efficient-base-repair/compare/2.0.1...2.0.2
