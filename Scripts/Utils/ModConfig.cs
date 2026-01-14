@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -6,10 +7,71 @@ using System.Xml;
 using UnityEngine;
 
 
+public class NetPackageModConfig : NetPackage
+{
+    private string assemblyName;
+
+    public NetPackageModConfig Setup(string assemblyName)
+    {
+        this.assemblyName = assemblyName;
+        return this;
+    }
+
+    public override void ProcessPackage(World _world, GameManager _callbacks)
+    {
+        var connectionManager = SingletonMonoBehaviour<ConnectionManager>.Instance;
+
+        if (connectionManager.IsServer)
+        {
+            Sender.SendPackage(this);
+        }
+        else
+        {
+            ReceiveModConfig();
+        }
+    }
+
+    public override void write(PooledBinaryWriter _writer)
+    {
+        base.write(_writer);
+        _writer.Write(assemblyName);
+    }
+
+    public override void read(PooledBinaryReader _reader)
+    {
+        assemblyName = _reader.ReadString();
+    }
+
+    public static IEnumerator RequestModConfig(string assemblyName)
+    {
+        var connManager = SingletonMonoBehaviour<ConnectionManager>.Instance;
+
+        connManager.SendToServer(NetPackageManager.GetPackage<NetPackageModConfig>().Setup(assemblyName));
+
+        while (!ModConfig.instances.ContainsKey(assemblyName) && connManager.IsConnected)
+        {
+            yield return null;
+        }
+    }
+
+    public override int GetLength()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void ReceiveModConfig()
+    {
+
+        ModConfig.instances[assemblyName] = new ModConfig(assemblyName);
+    }
+}
+
 public class ModConfig
 {
     [AttributeUsage(AttributeTargets.Field)]
     public class ReadOnlyAttribute : Attribute { }
+
+    public static readonly Dictionary<string, ModConfig> instances = new Dictionary<string, ModConfig>();
 
     private readonly Dictionary<string, string> properties = new Dictionary<string, string>();
 
@@ -24,6 +86,33 @@ public class ModConfig
     public readonly string modConfigPath;
 
     public readonly int version;
+
+    public static ModConfig Get(int version = 0, bool save = false)
+    {
+        var assemblyName = Assembly.GetCallingAssembly().GetName().Name;
+        var connectionManager = SingletonMonoBehaviour<ConnectionManager>.Instance;
+
+        if (connectionManager.IsServer)
+        {
+            if (!instances.ContainsKey(assemblyName))
+            {
+                instances[assemblyName] = new ModConfig();
+            }
+
+            return instances[assemblyName];
+        }
+        else
+        {
+            NetPackageModConfig.RequestModConfig(assemblyName);
+
+            return instances[assemblyName];
+        }
+    }
+
+    public ModConfig(string assemblyName)
+    {
+        modName = assemblyName;
+    }
 
     public ModConfig(int version = 0, bool save = false)
     {
