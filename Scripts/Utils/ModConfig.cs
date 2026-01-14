@@ -27,10 +27,11 @@ public class ModConfig
 
     public ModConfig(int version = 0, bool save = false)
     {
-        var callingAssembly = Assembly.GetCallingAssembly();
+        var assembly = Assembly.GetCallingAssembly();
+        var mod = ModManager.GetModForAssembly(assembly);
 
-        this.modPath = Path.GetDirectoryName(callingAssembly.Location);
-        this.modName = callingAssembly.GetName().Name;
+        this.modPath = Path.GetFullPath(mod.Path);
+        this.modName = mod.Name;
         this.version = version;
 
         this.userDataConfigPath = $"{GameIO.GetUserGameDataDir()}/{modName}.ModConfig.xml";

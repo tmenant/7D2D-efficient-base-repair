@@ -77,4 +77,4 @@ The system's behavior is entirely configurable via [ModConfig.xml](./ModConfig.x
 ## Development & Tooling
 
   * **Changelog:** Track technical iterations in [CHANGELOG.md](https://www.google.com/search?q=./CHANGELOG.md).
-  * **Environment:** Developed for 7D2D v1.3+ using .NET Framework 4.8.
+  * **Environment:** Developed for 7D2D v1.3+ using [.NET Framework 4.8 dev kit](https://dotnet.microsoft.com/fr-fr/download/dotnet-framework/thank-you/net48-developer-pack-offline-installer).

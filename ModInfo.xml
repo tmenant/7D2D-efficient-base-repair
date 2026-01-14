@@ -4,6 +4,6 @@
 	<DisplayName value="EfficientBaseRepair" />
 	<Description value="A modlet to automate base repairs, upgrades, and automatically refuel or reload blocks like generators, traps, and more." />
 	<Author value="tmenant" />
-	<Version value="2.1.1" />
+	<Version value="2.1.2" />
 	<Website value="https://github.com/tmenant/7D2D-efficient-base-repair" />
 </xml>
