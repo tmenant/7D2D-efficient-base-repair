@@ -1,5 +1,5 @@
 <configs>
-    <append xpath="/controls">
+    <append xpath="/templates">
 
         <ebr_material_entry>
             <rect
@@ -14,7 +14,7 @@
 
                 <sprite name="backgroundMain" pos="0,3" width="260" height="50" color="[black]" type="sliced" />
                 <sprite name="background" width="254" height="44" pos="3,0" color="[darkGrey]" type="sliced" />
-                <sprite name="icon" atlas="ItemIconAtlas" size="40,40" pos="5,-2" foregroundlayer="true" />
+                <sprite name="icon" atlas="ItemIconAtlas" sprite="{iconName}" size="40,40" pos="5,-2" foregroundlayer="true" />
                 <label name="label" pos="60,-12" width="150" height="30" font_size="24" />
             </rect>
         </ebr_material_entry>
