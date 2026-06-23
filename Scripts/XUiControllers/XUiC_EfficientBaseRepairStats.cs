@@ -5,6 +5,8 @@ using UnityEngine.Scripting;
 [Preserve]
 public class XUiC_EfficientBaseRepairStats : XUiController
 {
+	private static readonly Logging.Logger logger = Logging.CreateLogger<XUiC_EfficientBaseRepairStats>();
+
 	private XUiController btnRefresh;
 
 	private XUiV_Button btnRefresh_Background;
@@ -39,7 +41,9 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	private bool lastOn;
 
-	public TileEntityEfficientBaseRepair TileEntity { get; set; }
+	public int WindowWidth;
+
+	public TEFeatureEBR TileEntity { get; set; }
 
 	public override void Init()
 	{
@@ -66,12 +70,72 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		((XUiV_Label)GetChildById("lblRefresh").ViewComponent).Text = Localization.Get("xuiServerBrowserRefreshList");
 	}
 
+	public override void Update(float _dt)
+	{
+		base.Update(_dt);
+
+		if (TileEntity != null)
+		{
+			if (lastOn != TileEntity.IsOn)
+			{
+				lastOn = TileEntity.IsOn;
+				RefreshIsOn(TileEntity.IsOn);
+			}
+			RefreshUpgradeOn(TileEntity.UpgradeOn);
+			RefreshStats();
+			RefreshBindings();
+		}
+	}
+
+	public override void OnOpen()
+	{
+		base.OnOpen();
+
+		RefreshIsOn(TileEntity.IsOn);
+		RefreshUpgradeOn(TileEntity.UpgradeOn);
+		// RefreshBindings();
+		// RefreshBindingsSelfAndChildren();
+
+		logger.Info($"OnOpen, windowWidth: {WindowWidth}");
+	}
+
+	public override void OnClose()
+	{
+		// GameManager instance = GameManager.Instance;
+		// Vector3i blockPos = TileEntity.ToWorldPos();
+		// if (!XUiC_CameraWindow.hackyIsOpeningMaximizedWindow)
+		// {
+		// 	TileEntity.SetUserAccessing(_bUserAccessing: false);
+		// 	instance.TEUnlockServer(TileEntity.GetClrIdx(), blockPos, TileEntity.entityId, false);
+		// 	TileEntity.SetModified();
+		// }
+
+		var header = GetChildById("header");
+
+		logger.Info($"OnClose - width: {ViewComponent.Width}, header: {header.ViewComponent.Width}");
+
+		base.OnClose();
+	}
+
+	public override bool GetBindingValueInternal(ref string _value, string _bindingName)
+	{
+		if (_bindingName == "windowWidth")
+		{
+			// logger.Info($"binding: {_bindingName}, value: {WindowWidth}");
+
+			_value = WindowWidth.ToString();
+			return true;
+		}
+
+		return base.GetBindingValueInternal(ref _value, _bindingName);
+	}
+
 	public void SetUpgradeEnabled(bool enabled)
 	{
-		if (enabled != btnUpgrade.ViewComponent.forceHide)
+		if (enabled != btnUpgrade.ViewComponent.IsVisible)
 			return;
 
-		btnUpgrade.ViewComponent.forceHide = !enabled;
+		btnUpgrade.ViewComponent.IsVisible = !enabled;
 
 		if (enabled)
 		{
@@ -81,130 +145,6 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		{
 			btnRefresh.viewComponent.Position += new Vector2i(0, btnUpgrade.viewComponent.size.y);
 		}
-	}
-
-	public void SetWidth(int width)
-	{
-
-		int max_width = Mathf.Max(width, 230);
-
-		this.viewComponent.ParseAttribute("width", max_width.ToString(), this);
-
-		this.GetChildById("header").ViewComponent.ParseAttribute("width", max_width.ToString(), this);
-
-		XUiController content = GetChildById("content");
-
-		content
-			.GetChildById("backgroundMain")
-			.ViewComponent.ParseAttribute("width", max_width.ToString(), this);
-
-		content
-			.GetChildById("background")
-			.ViewComponent.ParseAttribute("width", max_width.ToString(), this);
-
-		content
-			.GetChildById("statGrid")
-			.GetChildById("stats")
-			.ViewComponent.ParseAttribute("cell_width", (max_width - 5).ToString(), this);
-
-		GetChildById("lblBlocksToRepair").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
-		GetChildById("lblBlocksToUpgrade").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
-		GetChildById("lblTotalDamages").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
-		GetChildById("lblVisitedBlocks").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
-		GetChildById("lblIterations").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
-		GetChildById("lblTimer").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
-
-		const int SPRITE_OFFSET = 80;
-
-		// button ON
-		XUiController btnOn = content.GetChildById("btnOn");
-
-		btnOn
-			.GetChildById("backgroundMain")
-			.ViewComponent.ParseAttribute("width", max_width.ToString(), this);
-
-		btnOn
-			.GetChildById("background")
-			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
-
-		btnOn
-			.GetChildById("buttonRect")
-			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
-
-		btnOn
-			.GetChildById("buttonRect")
-			.GetChildById("clickable")
-			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
-
-		btnOn
-			.GetChildById("buttonRect")
-			.GetChildById("lblOnOff")
-			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
-
-		btnOn
-			.GetChildById("buttonRect")
-			.GetChildById("sprOnOff")
-			.ViewComponent.ParseAttribute("pos", $"{max_width / 2 - SPRITE_OFFSET}, -2", this);
-
-		// button UPGRADE
-		XUiController btnUpgrade = content.GetChildById("btnUpgrade");
-
-		btnUpgrade
-			.GetChildById("backgroundMain")
-			.ViewComponent.ParseAttribute("width", max_width.ToString(), this);
-
-		btnUpgrade
-			.GetChildById("background")
-			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
-
-		btnUpgrade
-			.GetChildById("buttonRect")
-			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
-
-		btnUpgrade
-			.GetChildById("buttonRect")
-			.GetChildById("clickable")
-			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
-
-		btnUpgrade
-			.GetChildById("buttonRect")
-			.GetChildById("lblUpgrade")
-			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
-
-		btnUpgrade
-			.GetChildById("buttonRect")
-			.GetChildById("sprUpgrade")
-			.ViewComponent.ParseAttribute("pos", $"{max_width / 2 - SPRITE_OFFSET}, -2", this);
-
-		// button REFRESH
-		XUiController btnRefresh = content.GetChildById("btnRefresh");
-
-		btnRefresh
-			.GetChildById("backgroundMain")
-			.ViewComponent.ParseAttribute("width", max_width.ToString(), this);
-
-		btnRefresh
-			.GetChildById("background")
-			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
-
-		btnRefresh
-			.GetChildById("buttonRect")
-			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
-
-		btnRefresh
-			.GetChildById("buttonRect")
-			.GetChildById("clickable")
-			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
-
-		btnRefresh
-			.GetChildById("buttonRect")
-			.GetChildById("lblRefresh")
-			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
-
-		btnRefresh
-			.GetChildById("buttonRect")
-			.GetChildById("sprRefresh")
-			.ViewComponent.ParseAttribute("pos", $"{max_width / 2 - SPRITE_OFFSET}, -2", this);
 	}
 
 	private void BtnRefresh_OnPress(XUiController _sender, int _mouseButton)
@@ -263,56 +203,23 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		}
 	}
 
-	private XUiV_Label GetLabel(string labelName)
+	private void SetLabel(string labelName, string value)
 	{
-		return (XUiV_Label)GetChildById(labelName).ViewComponent;
+		var label = GetChildById(labelName).ViewComponent as XUiV_Label;
+
+		if (label != null)
+		{
+			label.text = value;
+		}
 	}
 
 	private void RefreshStats()
 	{
-		GetLabel("lblBlocksToRepair").Text = $"{TileEntity.DamagedBlockCount:N0} damaged blocks found.";
-		GetLabel("lblBlocksToUpgrade").Text = $"{TileEntity.UpgradableBlockCount:N0} upgradable blocks found.";
-		GetLabel("lblTotalDamages").Text = $"{TileEntity.TotalDamagesCount:N0} damages points to repair.";
-		GetLabel("lblVisitedBlocks").Text = $"{TileEntity.VisitedBlocksCount:N0} blocks visited.";
-		GetLabel("lblIterations").Text = $"{TileEntity.BfsIterationsCount} iterations done.";
-		GetLabel("lblTimer").Text = $"Repair time {TileEntity.CalcRepairTime()}";
+		SetLabel("lblBlocksToRepair", $"{TileEntity.DamagedBlockCount:N0} damaged blocks found.");
+		SetLabel("lblBlocksToUpgrade", $"{TileEntity.UpgradableBlockCount:N0} upgradable blocks found.");
+		SetLabel("lblTotalDamages", $"{TileEntity.TotalDamagesCount:N0} damages points to repair.");
+		SetLabel("lblVisitedBlocks", $"{TileEntity.VisitedBlocksCount:N0} blocks visited.");
+		SetLabel("lblTimer", $"Repair time {TileEntity.CalcRepairTime()}");
 	}
 
-	public override void Update(float _dt)
-	{
-		if ((GameManager.Instance != null || GameManager.Instance.World != null) && TileEntity != null)
-		{
-			base.Update(_dt);
-			if (lastOn != TileEntity.IsOn)
-			{
-				lastOn = TileEntity.IsOn;
-				RefreshIsOn(TileEntity.IsOn);
-			}
-			RefreshUpgradeOn(TileEntity.UpgradeOn);
-			RefreshStats();
-			RefreshBindings();
-		}
-	}
-
-	public override void OnOpen()
-	{
-		base.OnOpen();
-		TileEntity.SetUserAccessing(_bUserAccessing: true);
-		RefreshIsOn(TileEntity.IsOn);
-		RefreshUpgradeOn(TileEntity.UpgradeOn);
-		RefreshBindings();
-	}
-
-	public override void OnClose()
-	{
-		GameManager instance = GameManager.Instance;
-		Vector3i blockPos = TileEntity.ToWorldPos();
-		if (!XUiC_CameraWindow.hackyIsOpeningMaximizedWindow)
-		{
-			TileEntity.SetUserAccessing(_bUserAccessing: false);
-			instance.TEUnlockServer(TileEntity.GetClrIdx(), blockPos, TileEntity.entityId, false);
-			TileEntity.SetModified();
-		}
-		base.OnClose();
-	}
 }

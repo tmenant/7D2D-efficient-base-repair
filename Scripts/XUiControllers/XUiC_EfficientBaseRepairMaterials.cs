@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class XUiC_EfficientBaseRepairMaterials : XUiController
 {
-    public TileEntityEfficientBaseRepair TileEntity { get; set; }
+    public TEFeatureEBR TileEntity { get; set; }
 
     private XUiC_EBRMaterialEntry[] MaterialEntries { get; set; }
 
@@ -65,13 +65,12 @@ public class XUiC_EfficientBaseRepairMaterials : XUiController
         var requiredMaterials = GetPagedMaterials(currentPageNumber, MaterialEntries.Length);
         var index = 0;
 
-        foreach (var entry in requiredMaterials)
+        foreach (var (itemName, itemQuantity) in requiredMaterials)
         {
-            string text = Localization.Get(entry.Key);
-            string iconName = ItemClass.GetItem(entry.Key).ItemClass.GetIconName();
+            string iconName = ItemClass.GetItem(itemName).ItemClass.GetIconName();
 
-            int availableMaterialsCount = itemsDict.ContainsKey(entry.Key) ? itemsDict[entry.Key] : 0;
-            int requiredMaterialsCount = entry.Value;
+            int availableMaterialsCount = itemsDict.ContainsKey(itemName) ? itemsDict[itemName] : 0;
+            int requiredMaterialsCount = itemQuantity;
 
             if (requiredMaterialsCount <= 0)
                 continue;

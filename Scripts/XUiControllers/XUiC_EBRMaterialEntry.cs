@@ -23,7 +23,7 @@ public class XUiC_EBRMaterialEntry : XUiController
 
     public void SetIcon(string iconName)
     {
-        Sprite.ParseAttribute("sprite", iconName, this);
+        Sprite.SetSpriteImmediately(iconName);
     }
 
     public void SetQuantity(int available, int required)
@@ -35,12 +35,12 @@ public class XUiC_EBRMaterialEntry : XUiController
     public void SetEmpty()
     {
         Label.Text = "";
-        Sprite.ParseAttribute("sprite", "", this);
+        Sprite.SetSpriteImmediately(null);
     }
 
-    public override bool ParseAttribute(string name, string value, XUiController _parent)
+    public override bool ParseAttribute(string name, string value)
     {
-        if (base.ParseAttribute(name, value, _parent))
+        if (base.ParseAttribute(name, value))
             return true;
 
         switch (name)
