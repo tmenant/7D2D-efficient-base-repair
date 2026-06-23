@@ -1,6 +1,6 @@
 {
     "name": "EfficientBaseRepair",
-    "csproj": "EfficientBaseRepair.csproj",
+    "csproj": "EfficientBaseRepair/EfficientBaseRepair.csproj",
     "include": [
         "ModInfo.xml",
         "ModConfig.xml",
