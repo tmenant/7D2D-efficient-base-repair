@@ -11,6 +11,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 - Fixed compatibility issues for v3.0b252
 
+### Changed
+- Updated UI
+- Increased default storage size to 8x7 grid
+
+### Removed
+- Iterations stat was removed from the stats panel
+
 ## [2.1.2] - 2026-01-14
 
 ### Fixed
