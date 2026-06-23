@@ -40,9 +40,9 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
         {
             sbm.CreateCategory(
                 _name: selectionBoxCategory,
-                _colSelected: SelectionBoxManager.ColSelectionActive,
-                _colUnselected: SelectionBoxManager.ColSelectionInactive,
-                _colFaceSelected: SelectionBoxManager.ColSelectionFaceSel,
+                _colSelected: new UnityEngine.Color(0f, 0f, 1f, 0.5f),
+                _colUnselected: new UnityEngine.Color(0f, 0f, 1f, 0.5f),
+                _colFaceSelected: new UnityEngine.Color(1f, 1f, 0f, 0.4f),
                 _bCollider: false,
                 _tag: null
             );
@@ -80,7 +80,7 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
 
         SelectionBoxManager.Instance.Deactivate();
 
-        foreach (var pos in TileEntityEfficientBaseRepair.GetNeighbors(position, blockValue))
+        foreach (var pos in TEFeatureEBR.GetNeighbors(position, blockValue))
         {
             SelectBlock(pos);
         }
