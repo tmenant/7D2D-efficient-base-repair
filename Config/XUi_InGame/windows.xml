@@ -15,11 +15,11 @@
                 <sprite name="backgroundMain" color="[black]" type="sliced" sprite="menu_empty3px" fillcenter="false" width="{windowWidth}" />
 
                 <grid name="stats" rows="5" cols="1" pos="8,-6" cell_height="30" repeat_content="false" width="{windowWidth}">
-                    <label name="lblBlocksToRepair" font_size="21" text="lblBlocksToRepair" width="{windowWidth}" />
-                    <label name="lblBlocksToUpgrade" font_size="21" text="lblBlocksToUpgrade" width="{windowWidth}" />
-                    <label name="lblTotalDamages" font_size="21" text="lblTotalDamages" width="{windowWidth}" />
-                    <label name="lblVisitedBlocks" font_size="21" text="lblVisitedBlocks" width="{windowWidth}" />
-                    <label name="lblTimer" font_size="21" text="lblTimer" width="{windowWidth}" />
+                    <label font_size="21" width="{windowWidth}" text="{lblBlocksToRepair}" />
+                    <label font_size="21" width="{windowWidth}" text="{lblBlocksToUpgrade}" />
+                    <label font_size="21" width="{windowWidth}" text="{lblTotalDamages}" />
+                    <label font_size="21" width="{windowWidth}" text="{lblVisitedBlocks}" />
+                    <label font_size="21" width="{windowWidth}" text="{lblTimer}" />
                 </grid>
             </rect>
 

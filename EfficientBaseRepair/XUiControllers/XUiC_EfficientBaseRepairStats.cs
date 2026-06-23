@@ -74,17 +74,15 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 	{
 		base.Update(_dt);
 
-		if (TileEntity != null)
+		if (TileEntity == null)
+			return;
+
+		if (lastOn != TileEntity.IsOn)
 		{
-			if (lastOn != TileEntity.IsOn)
-			{
-				lastOn = TileEntity.IsOn;
-				RefreshIsOn(TileEntity.IsOn);
-			}
-			RefreshUpgradeOn(TileEntity.UpgradeOn);
-			RefreshStats();
-			RefreshBindings();
+			RefreshIsOn(TileEntity.IsOn);
 		}
+
+		RefreshUpgradeOn(TileEntity.UpgradeOn);
 	}
 
 	public override void OnOpen()
@@ -119,15 +117,35 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	public override bool GetBindingValueInternal(ref string _value, string _bindingName)
 	{
-		if (_bindingName == "windowWidth")
+		switch (_bindingName)
 		{
-			// logger.Info($"binding: {_bindingName}, value: {WindowWidth}");
+			case "windowWidth":
+				_value = WindowWidth.ToString();
+				return true;
 
-			_value = WindowWidth.ToString();
-			return true;
+			case "lblBlocksToRepair":
+				_value = $"{TileEntity?.DamagedBlockCount:N0} damaged blocks found.";
+				return true;
+
+			case "lblBlocksToUpgrade":
+				_value = $"{TileEntity?.UpgradableBlockCount:N0} upgradable blocks found.";
+				return true;
+
+			case "lblTotalDamages":
+				_value = $"{TileEntity?.TotalDamagesCount:N0} damages points to repair.";
+				return true;
+
+			case "lblVisitedBlocks":
+				_value = $"{TileEntity?.VisitedBlocksCount:N0} blocks visited.";
+				return true;
+
+			case "lblTimer":
+				_value = $"Repair time {TileEntity?.CalcRepairTime()}";
+				return true;
+
+			default:
+				return base.GetBindingValueInternal(ref _value, _bindingName);
 		}
-
-		return base.GetBindingValueInternal(ref _value, _bindingName);
 	}
 
 	public void SetUpgradeEnabled(bool enabled)
@@ -185,9 +203,11 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	private void RefreshIsOn(bool isOn)
 	{
+		lastOn = isOn;
+
 		if (isOn)
 		{
-			lblOnOff.Text = turnOff;
+			lblOnOff.Text = PropTurnOff;
 			if (sprOnOff != null)
 			{
 				sprOnOff.Color = onColor;
@@ -195,31 +215,12 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		}
 		else
 		{
-			lblOnOff.Text = turnOn;
+			lblOnOff.Text = PropTurnOn;
 			if (sprOnOff != null)
 			{
 				sprOnOff.Color = offColor;
 			}
 		}
-	}
-
-	private void SetLabel(string labelName, string value)
-	{
-		var label = GetChildById(labelName).ViewComponent as XUiV_Label;
-
-		if (label != null)
-		{
-			label.text = value;
-		}
-	}
-
-	private void RefreshStats()
-	{
-		SetLabel("lblBlocksToRepair", $"{TileEntity.DamagedBlockCount:N0} damaged blocks found.");
-		SetLabel("lblBlocksToUpgrade", $"{TileEntity.UpgradableBlockCount:N0} upgradable blocks found.");
-		SetLabel("lblTotalDamages", $"{TileEntity.TotalDamagesCount:N0} damages points to repair.");
-		SetLabel("lblVisitedBlocks", $"{TileEntity.VisitedBlocksCount:N0} blocks visited.");
-		SetLabel("lblTimer", $"Repair time {TileEntity.CalcRepairTime()}");
 	}
 
 }
