@@ -58,7 +58,6 @@ public class XUiC_EfficientBaseRepair : XUiController
 
 		MaterialsWindow.TileEntity = tileEntity;
 
-		statsWindow.SetUpgradeEnabled(TileEntity.UpgradeEnabled);
 		statsWindow.WindowWidth = lootWindow.windowWidth;
 		statsWindow.TileEntity = tileEntity;
 

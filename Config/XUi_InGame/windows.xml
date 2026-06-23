@@ -45,7 +45,7 @@
                     </rect>
                 </rect>
 
-                <rect name="btnUpgrade" depth="3" height="36">
+                <rect name="btnUpgrade" depth="3" height="36" visible="{upgradeEnabled}">
                     <sprite depth="8" name="backgroundMain" sprite="menu_empty3px" color="[black]" type="sliced" fillcenter="false" />
                     <sprite depth="2" name="background" sprite="menu_empty" height="32" color="[darkGrey]" type="sliced" />
                     <rect name="buttonRect" depth="3" pos="0,-3" height="31">

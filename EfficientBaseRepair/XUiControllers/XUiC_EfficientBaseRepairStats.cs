@@ -143,25 +143,12 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 				_value = $"Repair time {TileEntity?.CalcRepairTime()}";
 				return true;
 
+			case "upgradeEnabled":
+				_value = TileEntity?.UpgradeEnabled.ToString();
+				return true;
+
 			default:
 				return base.GetBindingValueInternal(ref _value, _bindingName);
-		}
-	}
-
-	public void SetUpgradeEnabled(bool enabled)
-	{
-		if (enabled != btnUpgrade.ViewComponent.IsVisible)
-			return;
-
-		btnUpgrade.ViewComponent.IsVisible = !enabled;
-
-		if (enabled)
-		{
-			btnRefresh.viewComponent.Position -= new Vector2i(0, btnUpgrade.viewComponent.size.y);
-		}
-		else
-		{
-			btnRefresh.viewComponent.Position += new Vector2i(0, btnUpgrade.viewComponent.size.y);
 		}
 	}
 
