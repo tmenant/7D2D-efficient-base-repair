@@ -25,11 +25,10 @@
             <drop event="Fall" name="scrapMetalPile" count="1" prob="1" stick_chance="1" />
 
             <property class="CompositeFeatures">
-                <property class="TEFeatureStorage">
-                    <property name="LootList" value="playerWoodWritableStorage" />
+                <property class="TEFeatureEBR">
+                    <property name="LootList" value="EBRStorage" />
                 </property>
                 <property class="TEFeatureLockable" />
-                <property class="TEFeatureEBR" />
             </property>
 
             <property class="RepairItems">

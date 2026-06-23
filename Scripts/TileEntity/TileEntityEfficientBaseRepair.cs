@@ -7,7 +7,7 @@ using static Block;
 using Platform;
 
 
-public class TEFeatureEBR : TEFeatureAbs
+public class TEFeatureEBR : TEFeatureStorage
 {
 	private static readonly Logging.Logger logger = Logging.CreateLogger<TEFeatureEBR>();
 
@@ -39,7 +39,6 @@ public class TEFeatureEBR : TEFeatureAbs
 	private readonly List<BlockChangeInfo> blockChangeInfos = new List<BlockChangeInfo>();
 	public readonly Dictionary<string, int> requiredMaterials = new Dictionary<string, int>();
 
-	public TEFeatureStorage GetFeatureStorage() => Parent.GetSelfOrFeature<TEFeatureStorage>();
 	public TEFeatureLockable GetFeatureLockable() => Parent.GetSelfOrFeature<TEFeatureLockable>();
 	public PlatformUserIdentifierAbs Owner => GetFeatureLockable().GetOwner();
 
@@ -61,9 +60,7 @@ public class TEFeatureEBR : TEFeatureAbs
 	{
 		Dictionary<string, int> itemsDict = new Dictionary<string, int>();
 
-		var teLootable = GetFeatureStorage();
-
-		foreach (ItemStack stack in teLootable?.items)
+		foreach (ItemStack stack in items)
 		{
 			if (stack.itemValue.ItemClass == null)
 				continue;
@@ -215,11 +212,9 @@ public class TEFeatureEBR : TEFeatureAbs
 		int neededItemCount = itemCount;
 		int totalTaken = 0;
 
-		var teLootable = GetFeatureStorage();
-
-		for (int i = 0; i < teLootable?.items?.Length; i++)
+		for (int i = 0; i < items?.Length; i++)
 		{
-			ItemStack stack = teLootable.items[i];
+			ItemStack stack = items[i];
 
 			if (stack.IsEmpty())
 				continue;
@@ -243,7 +238,7 @@ public class TEFeatureEBR : TEFeatureAbs
 			if (stack.count < 0)
 				logger.Error($"stack.count  < 0 (={stack.count})");
 
-			teLootable.UpdateSlot(i, stack.Clone());
+			UpdateSlot(i, stack.Clone());
 
 			if (neededItemCount == 0)
 				break;
@@ -650,9 +645,9 @@ public class TEFeatureEBR : TEFeatureAbs
 		RefreshReloadItems();
 	}
 
-	public void Switch(bool forceRefresh_ = false)
+	public void Switch(bool forceRefresh = false)
 	{
-		if (forceRefresh_)
+		if (forceRefresh)
 			forceFullRefresh = true;
 
 		IsOn = !IsOn;
@@ -899,6 +894,22 @@ public class TEFeatureEBR : TEFeatureAbs
 		return wasModified;
 	}
 
+	private bool ActivateEBR(string _commandName, EntityPlayerLocal _player)
+	{
+		if (BloodMoonActive(GameManager.Instance.World))
+		{
+			GameManager.ShowTooltip(_player, Localization.Get("EfficientBaseRepairBloodMoonDenied"), string.Empty, "ui_denied");
+			return false;
+		}
+
+		bool forceRefresh = _commandName == TURN_ON_CMD;
+
+		Switch(forceRefresh);
+
+		return true;
+	}
+
+	// OVERRIDE API
 	public override void Read(PooledBinaryReader _br, TileEntity.StreamModeRead _eStreamMode)
 	{
 		base.Read(_br, _eStreamMode);
@@ -937,14 +948,12 @@ public class TEFeatureEBR : TEFeatureAbs
 		// -> allows the TileEntity to take items from containers, even if the user is accessing the container
 		// -> /!\ may cause unknown issues on concurency access to the container
 
-		TEFeatureStorage storage = GetFeatureStorage();
-
 		int itemsCount = _br.ReadInt32();
 		if (itemsCount > 0)
 		{
 			for (int i = 0; i < itemsCount; i++)
 			{
-				storage.items[i].Read(_br);
+				items[i].Read(_br);
 			}
 		}
 
@@ -991,13 +1000,10 @@ public class TEFeatureEBR : TEFeatureAbs
 			_bw.Write(entry.Value);
 		}
 
-
-		TEFeatureStorage storage = GetFeatureStorage();
-
 		// see the note in the read method upper
-		_bw.Write(storage.items.Length);
+		_bw.Write(items.Length);
 
-		foreach (ItemStack stack in storage.items)
+		foreach (ItemStack stack in items)
 		{
 			stack.Clone().Write(_bw);
 		}
@@ -1055,26 +1061,37 @@ public class TEFeatureEBR : TEFeatureAbs
 		ElapsedTicksSinceLastRefresh++;
 	}
 
-	public override void CopyFromInternal(TileEntityComposite _other)
-	{
-		throw new NotImplementedException();
-	}
-
 	public override bool OnBlockActivated(ReadOnlySpan<char> _commandName, WorldBase _world, Vector3i _blockPos, BlockValue _blockValue, EntityPlayerLocal _player)
 	{
-		logger.Info($"commandName: '{new string(_commandName)}'");
+		string stringCommand = new string(_commandName);
+
+		switch (stringCommand)
+		{
+			case TURN_ON_CMD:
+			case TURN_OFF_CMD:
+				return ActivateEBR(stringCommand, _player);
+
+			// case "take":
+			// 	TakeItemWithTimer(_blockPos, _blockValue, _player, takeDelay);
+			// 	return true;
+
+			default:
+				break;
+		}
 
 		return base.OnBlockActivated(_commandName, _world, _blockPos, _blockValue, _player);
 	}
 
 	public override void OnAdded(Vector3i _blockPos, BlockValue _blockValue)
 	{
-		var lockable = GetFeatureLockable();
-
-		logger.Info($"pos: {_blockPos}, owner: {lockable.GetOwner()} / {PlatformManager.InternalLocalUserIdentifier}");
-		GetFeatureLockable().SetOwner(PlatformManager.InternalLocalUserIdentifier);
-
 		base.OnAdded(_blockPos, _blockValue);
+
+		TEFeatureLockable lockable = GetFeatureLockable();
+
+		if (lockable.GetOwner() == null)
+		{
+			lockable.SetOwner(PlatformManager.InternalLocalUserIdentifier);
+		}
 	}
 
 	public override void InitBlockActivationCommands(Action<BlockActivationCommand, TileEntityComposite.EBlockCommandOrder, TileEntityFeatureData> _addCallback)
@@ -1099,5 +1116,40 @@ public class TEFeatureEBR : TEFeatureAbs
 	public override string GetActivationText(WorldBase _world, Vector3i _blockPos, BlockValue _blockValue, EntityAlive _entityFocusing, string _activateHotkeyMarkup, string _focusedTileEntityName)
 	{
 		return Localization.Get("useWorkstation");
+	}
+
+	public override void OnLockedLocal(bool _success, ILockContext _context, ushort _channel)
+	{
+		ShowUI(_success);
+	}
+
+	public new void ShowUI(bool _lockGranted)
+	{
+		logger.Info("ShowUI");
+
+		LocalPlayerUI uIForPrimaryPlayer = LocalPlayerUI.GetUIForPrimaryPlayer();
+		if (!_lockGranted)
+		{
+			GameManager.ShowTooltip(uIForPrimaryPlayer.entityPlayer, Localization.Get("ttNoInteractItem"), string.Empty, "ui_denied");
+			return;
+		}
+
+		XUiC_EfficientBaseRepair.Open(uIForPrimaryPlayer, this);
+
+		LootContainer lootContainer = LootContainer.GetLootContainer(lootListName);
+		if (lootContainer != null && uIForPrimaryPlayer.entityPlayer != null)
+		{
+			lootContainer.ExecuteBuffActions(uIForPrimaryPlayer.entityPlayer.entityId, uIForPrimaryPlayer.entityPlayer);
+		}
+
+		BlockValue block = GameManager.Instance.World.GetBlock(ToWorldPos());
+
+		if (!GameManager.Instance.World.IsEditor() && !bTouched)
+		{
+			EntityPlayerLocal entityPlayer = uIForPrimaryPlayer.entityPlayer;
+			entityPlayer.MinEventContext.TileEntity = this;
+			entityPlayer.MinEventContext.BlockValue = block;
+			entityPlayer.FireEvent(MinEventTypes.onSelfOpenLootContainer);
+		}
 	}
 }
