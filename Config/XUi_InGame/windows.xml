@@ -25,33 +25,39 @@
 
             <grid name="buttons" rows="4" cols="1" width="150" height="156" pos="{#windowWidth - 160},-60" cell_height="45" repeat_content="false">
 
-                <rect name="btnOn" depth="3" height="36">
+                <rect depth="3" height="36">
+
                     <sprite depth="8" name="backgroundMain" sprite="menu_empty3px" color="[black]" type="sliced" fillcenter="false" />
                     <sprite depth="2" name="background" sprite="menu_empty" height="32" color="[darkGrey]" type="sliced" />
-                    <rect name="buttonRect" depth="3" pos="0,-3" height="31">
-                        <button name="clickable" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" />
-                        <sprite depth="2" name="sprOnOff" width="24" height="24" pos="10,-2" color="[iconColor]" sprite="ui_game_symbol_electric_switch" />
-                        <label depth="2" name="lblOnOff" pos="40,-4" justify="left" text_key="xuiTurnOn" font_size="24" />
+
+                    <rect depth="3" pos="0,-3" height="31">
+                        <button name="btnOn" defaultcolor="[mediumGrey]" disabledcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" />
+                        <sprite name="sprOnOff" pos="10,-2" width="24" height="24" color="[iconColor]" sprite="ui_game_symbol_electric_switch" />
+                        <label name="lblOnOff" pos="40,-4" justify="left" font_size="24" />
                     </rect>
                 </rect>
 
-                <rect name="btnRefresh" depth="3" height="36">
+                <rect depth="3" height="36">
+
                     <sprite depth="8" name="backgroundMain" sprite="menu_empty3px" color="[black]" type="sliced" fillcenter="false" />
                     <sprite depth="2" name="background" sprite="menu_empty" height="32" color="[darkGrey]" type="sliced" />
-                    <rect name="buttonRect" depth="3" pos="0,-3" height="31">
-                        <button name="clickable" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" />
-                        <sprite depth="1" name="sprRefresh" width="24" height="24" pos="10,-2" color="[iconColor]" sprite="ui_game_symbol_scrap" />
-                        <label depth="2" name="lblRefresh" pos="40,-4" justify="left" font_size="24" />
+
+                    <rect depth="3" pos="0,-3" height="31">
+                        <button name="btnRefresh" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" />
+                        <sprite pos="10,-2" width="24" height="24" color="[iconColor]" sprite="ui_game_symbol_scrap" />
+                        <label pos="40,-4" justify="left" text_key="xuiServerBrowserRefreshList" font_size="24" />
                     </rect>
                 </rect>
 
-                <rect name="btnUpgrade" depth="3" height="36" visible="{upgradeEnabled}">
+                <rect depth="3" height="36" visible="{upgradeEnabled}">
+
                     <sprite depth="8" name="backgroundMain" sprite="menu_empty3px" color="[black]" type="sliced" fillcenter="false" />
                     <sprite depth="2" name="background" sprite="menu_empty" height="32" color="[darkGrey]" type="sliced" />
-                    <rect name="buttonRect" depth="3" pos="0,-3" height="31">
-                        <button name="clickable" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" />
-                        <sprite depth="2" name="sprUpgrade" width="24" height="24" pos="10,-2" color="[iconColor]" sprite="ui_game_symbol_resource" />
-                        <label depth="2" name="lblupgrade" pos="40,-4" justify="left" text_key="xuiTurnOn" font_size="24" />
+
+                    <rect depth="3" pos="0,-3" height="31">
+                        <button name="btnUpgrade" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" />
+                        <sprite name="sprUpgrade" pos="10,-2" width="24" height="24" color="[iconColor]" sprite="ui_game_symbol_resource" />
+                        <label name="lblupgrade" pos="40,-4" justify="left" font_size="24" />
                     </rect>
                 </rect>
 
