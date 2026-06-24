@@ -27,10 +27,4 @@ public class Config
     public static bool keepPaintAfterUpgrade = config.GetBool("keepPaintAfterUpgrade");
 
     public static string upgradeSound = config.GetString("upgradeSound");
-
-    [ModConfig.ReadOnly]
-    public static Vector2i lootSize = config.GetVector2i("lootSize");
-
-    [ModConfig.ReadOnly]
-    public const TileEntityType tileEntityType = (TileEntityType)191;
 }

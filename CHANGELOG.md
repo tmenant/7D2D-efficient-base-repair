@@ -12,11 +12,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed compatibility issues for v3.0b252
 
 ### Changed
-- Updated UI
-- Increased default storage size to 8x7 grid
+- UI: Changed configuration of the action buttons
+- UI: Increased default loot storage size to 8x7 grid
+- ModConfig: Setting 'lootSize' was removed from ModConfig.xml, the loot storage size is now defined in [loot.xml](./Config/Loot.xml)
 
 ### Removed
-- Iterations stat was removed from the stats panel
+- UI: The stat 'iterations' was removed from the stats panel, as it is an internal info used for debugging
 
 ## [2.1.2] - 2026-01-14
 

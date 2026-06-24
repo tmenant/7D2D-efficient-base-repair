@@ -60,8 +60,6 @@ public class XUiC_EfficientBaseRepair : XUiController
 
 		statsWindow.WindowWidth = lootWindow.windowWidth;
 		statsWindow.TileEntity = tileEntity;
-
-		logger.Info($"lootWindow width: {statsWindow.WindowWidth}");
 	}
 
 	public static void Open(LocalPlayerUI playerUI, TEFeatureEBR tileEntity)

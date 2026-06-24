@@ -1125,8 +1125,6 @@ public class TEFeatureEBR : TEFeatureStorage
 
 	public new void ShowUI(bool _lockGranted)
 	{
-		logger.Info("ShowUI");
-
 		LocalPlayerUI uIForPrimaryPlayer = LocalPlayerUI.GetUIForPrimaryPlayer();
 		if (!_lockGranted)
 		{
