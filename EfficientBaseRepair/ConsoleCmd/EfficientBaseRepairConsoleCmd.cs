@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
 {
-    private static readonly Logging.Logger logger = Logging.CreateLogger("EfficientBaseRepairConsoleCmd");
+    private static readonly Logging.Logger logger = Logging.CreateLogger("EBRConsoleCmd");
 
     public static readonly List<string> activeBoxNames = new List<string>();
 
@@ -28,6 +27,7 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
             - setfuel <value>: set the given fuel amount into the opened powerSource item. If no value is given, a random value is choosen.
             - getconfig <name>: show the value of the given ebr parameter. The name is case-sensitive and must be defined in ModConfig.xml, ex: `get repairRate`
             - setconfig <name> <value>: set the value of the given ebr parameter, ex: `set repairRate 100`
+            - setdamage, sd: set a given damage value to all blocks inside the selection box
         ";
     }
 
@@ -63,6 +63,37 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
         selectionCat.SetVisible(true);
 
         activeBoxNames.Add(boxName);
+    }
+
+    private IEnumerable<Vector3i> GetSelectionBoxPositions()
+    {
+        var selection = BlockToolSelection.Instance;
+
+        var start = selection.m_selectionStartPoint;
+        var end = selection.m_SelectionEndPoint;
+
+        int y = start.y;
+        while (true)
+        {
+            int x = start.x;
+            while (true)
+            {
+                int z = start.z;
+                while (true)
+                {
+                    yield return new Vector3i(x, y, z);
+
+                    if (z == end.z) break;
+                    z += Math.Sign(end.z - start.z);
+                }
+                if (x == end.x) break;
+                x += Math.Sign(end.x - start.x);
+            }
+            if (y == end.y) break;
+            y += Math.Sign(end.y - start.y);
+        }
+
+        yield break;
     }
 
     private void CmdIsChild()
@@ -157,6 +188,35 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
         }
     }
 
+    private void CmdSetDamage(string[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new ArgumentException("missing argument: 'damage'");
+        }
+
+        if (!int.TryParse(args[1], out int damage))
+        {
+            throw new ArgumentException($"Invalid argument: '{args[0]}'. Integer value is required");
+        }
+
+        var blockChangeInfos = new List<BlockChangeInfo>();
+
+        foreach (var blockPos in GetSelectionBoxPositions())
+        {
+            var blockValue = GameManager.Instance.World.GetBlock(blockPos);
+            var maxDamage = blockValue.Block.MaxDamage;
+
+            if (!blockValue.isair)
+            {
+                blockValue.damage = Math.Clamp(maxDamage - damage, 0, maxDamage);
+                blockChangeInfos.Add(new BlockChangeInfo(blockPos, blockValue));
+            }
+        }
+
+        GameManager.Instance.World.SetBlocksRPC(blockChangeInfos);
+    }
+
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
     {
         var args = _params.ToArray();
@@ -199,6 +259,11 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
             case "getconfig":
             case "get":
                 CmdGetConfig(args);
+                break;
+
+            case "setdamage":
+            case "sd":
+                CmdSetDamage(args);
                 break;
 
             default:
