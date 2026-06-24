@@ -168,7 +168,7 @@ public class TEFeatureEBR : TEFeatureStorage
 			return null;
 
 		var itemName = GetUpgradeItemName(block.Block);
-		var itemCount = upgradeProperties.GetInt("UpgradeBlock.ItemCount");
+		var itemCount = upgradeProperties.GetInt("UpgradeBlock", "ItemCount");
 
 		if (itemName is null || itemName == "" || itemCount <= 0)
 			return null;
@@ -394,20 +394,20 @@ public class TEFeatureEBR : TEFeatureStorage
 
 	private string GetUpgradeItemName(Block block)
 	{
-		// NOTE: copied from ItemActionRepair.GetUpgradeItemName()
+		// See ItemActionRepair.GetUpgradeItemName()
 
-		string text = block.Properties.Values["UpgradeBlock.Item"];
+		string text = block.Properties.GetString("UpgradeBlock", "Item");
+
 		if (text != null && text.Length == 1 && text[0] == 'r')
 		{
 			text = block.RepairItems[0].ItemName;
 		}
-
 		return text;
 	}
 
 	private bool CanUpgradeBlock(BlockValue block)
 	{
-		return block.Block.Properties.Values.ContainsKey("UpgradeBlock.UpgradeHitCount");
+		return block.Block.Properties.GetString("UpgradeBlock", "UpgradeHitCount") != null;
 	}
 
 	private bool CanRefuelBlock(TileEntity te)

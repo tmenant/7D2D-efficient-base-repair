@@ -48,20 +48,8 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 		lblUpgrade.SetTextImmediately(TileEntity.UpgradeOn ? PropUpgradeOff : PropUpgradeOn);
 		sprUpgrade.SetColorImmediately(TileEntity.UpgradeOn ? onColor : offColor);
-	}
 
-	public override void OnClose()
-	{
-		// GameManager instance = GameManager.Instance;
-		// Vector3i blockPos = TileEntity.ToWorldPos();
-		// if (!XUiC_CameraWindow.hackyIsOpeningMaximizedWindow)
-		// {
-		// 	TileEntity.SetUserAccessing(_bUserAccessing: false);
-		// 	instance.TEUnlockServer(TileEntity.GetClrIdx(), blockPos, TileEntity.entityId, false);
-		// 	TileEntity.SetModified();
-		// }
-
-		base.OnClose();
+		RefreshBindingsSelfAndChildren();
 	}
 
 	public override bool GetBindingValueInternal(ref string _value, string _bindingName)

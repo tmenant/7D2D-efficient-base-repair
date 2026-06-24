@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class XUiC_EfficientBaseRepairMaterials : XUiController
 {
+    private static readonly Logging.Logger logger = Logging.CreateLogger<XUiC_EfficientBaseRepairMaterials>();
+
     public TEFeatureEBR TileEntity { get; set; }
 
     private XUiC_EBRMaterialEntry[] MaterialEntries { get; set; }
