@@ -11,8 +11,6 @@ public class XUiC_EfficientBaseRepairMaterials : XUiController
 
     private XUiC_EBRMaterialEntry[] MaterialEntries { get; set; }
 
-    private XUiController MaterialsPanel { get; set; }
-
     private XUiC_Paging Pager { get; set; }
 
     public override void Init()
@@ -20,12 +18,12 @@ public class XUiC_EfficientBaseRepairMaterials : XUiController
         base.Init();
 
         Pager = GetChildByType<XUiC_Paging>();
-        Pager.OnPageChanged += HandlePageChanged;
-
-        MaterialsPanel = GetChildById("materialsPanel");
-        MaterialsPanel.OnScroll += HandleOnScroll;
-
         MaterialEntries = GetChildrenByType<XUiC_EBRMaterialEntry>();
+
+        foreach (var entry in MaterialEntries)
+        {
+            entry.OnScroll += HandleOnScroll;
+        }
     }
 
     public override void OnOpen()
@@ -91,12 +89,6 @@ public class XUiC_EfficientBaseRepairMaterials : XUiController
         }
 
         Pager.LastPageNumber = lastPageNumber;
-    }
-
-    public void HandlePageChanged()
-    {
-        // Do nothing because the materials are updated at each frame
-        // (which might need to be changed to increase performances, but requires complex state management)
     }
 
     public void HandleOnScroll(XUiController _sender, float _delta)
