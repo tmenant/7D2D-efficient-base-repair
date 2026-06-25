@@ -10,8 +10,6 @@ public class XUiC_EBRMaterialEntry : XUiController
 
     private XUiV_Sprite Sprite { get; set; }
 
-    private ItemClass ItemClass { get; set; }
-
     public override void Init()
     {
         base.Init();
@@ -25,7 +23,7 @@ public class XUiC_EBRMaterialEntry : XUiController
 
     public void SetMaterial(ItemClass itemClass, int available, int required)
     {
-        ItemClass = itemClass;
+        ViewComponent.ToolTip = itemClass.GetLocalizedItemName();
         Label.Text = $"{available} / {required}";
         Label.Color = available >= required ? validColor : invalidColor;
         Sprite.SetSpriteImmediately(itemClass.GetIconName());
@@ -33,8 +31,8 @@ public class XUiC_EBRMaterialEntry : XUiController
 
     public void SetEmpty()
     {
-        Label.Text = "";
-        ItemClass = null;
+        ViewComponent.ToolTip = null;
+        Label.SetTextImmediately(null);
         Sprite.SetSpriteImmediately(null);
     }
 
@@ -55,19 +53,6 @@ public class XUiC_EBRMaterialEntry : XUiController
         }
 
         return false;
-    }
-
-    public override bool GetBindingValueInternal(ref string _value, string _bindingName)
-    {
-        switch (_bindingName)
-        {
-            case "tooltip":
-                _value = ItemClass?.GetLocalizedItemName();
-                return true;
-
-            default:
-                return base.GetBindingValueInternal(ref _value, _bindingName);
-        }
     }
 
     public override void OnHovered(bool _isOver)
