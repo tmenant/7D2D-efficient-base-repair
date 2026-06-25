@@ -69,7 +69,7 @@ public class XUiC_EfficientBaseRepairMaterials : XUiController
 
         foreach (var (itemName, itemQuantity) in requiredMaterials)
         {
-            string iconName = ItemClass.GetItem(itemName).ItemClass.GetIconName();
+            ItemClass itemClass = ItemClass.GetItem(itemName).ItemClass;
 
             int availableMaterialsCount = itemsDict.ContainsKey(itemName) ? itemsDict[itemName] : 0;
             int requiredMaterialsCount = itemQuantity;
@@ -80,8 +80,7 @@ public class XUiC_EfficientBaseRepairMaterials : XUiController
             if (index >= MaterialEntries.Length)
                 break;
 
-            MaterialEntries[index].SetIcon(iconName);
-            MaterialEntries[index].SetQuantity(availableMaterialsCount, requiredMaterialsCount);
+            MaterialEntries[index].SetMaterial(itemClass, availableMaterialsCount, requiredMaterialsCount);
 
             index++;
         }

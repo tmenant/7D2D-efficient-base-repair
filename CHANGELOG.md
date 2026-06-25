@@ -8,16 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [3.0.0] - 2026-06-17
 
+### Added
+- Tooltip information when hovering the materials panel
+
 ### Fixed
-- Fixed compatibility issues for v3.0b252
+- Compatibility issues for v3.0b252
 
 ### Changed
-- UI: Changed configuration of the action buttons
+- UI: Configuration of the action buttons
 - UI: Increased default loot storage size to 8x7 grid
-- ModConfig: Setting 'lootSize' was removed from ModConfig.xml, the loot storage size is now defined in [loot.xml](./Config/Loot.xml)
+- ModConfig: Moved `lootSize` setting from `ModConfig.xml` to [loot.xml](./Config/Loot.xml)
 
 ### Removed
-- UI: The stat 'iterations' was removed from the stats panel, as it is an internal info used for debugging
+- UI: The `iterations` stat from the stats panel (internal info used for debugging)
 
 ## [2.1.2] - 2026-01-14
 

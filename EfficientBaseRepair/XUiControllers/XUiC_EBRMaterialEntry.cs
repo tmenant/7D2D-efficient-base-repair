@@ -10,6 +10,8 @@ public class XUiC_EBRMaterialEntry : XUiController
 
     private XUiV_Sprite Sprite { get; set; }
 
+    private ItemClass ItemClass { get; set; }
+
     public override void Init()
     {
         base.Init();
@@ -21,20 +23,18 @@ public class XUiC_EBRMaterialEntry : XUiController
         EBRUtils.Assert(Sprite != null);
     }
 
-    public void SetIcon(string iconName)
+    public void SetMaterial(ItemClass itemClass, int available, int required)
     {
-        Sprite.SetSpriteImmediately(iconName);
-    }
-
-    public void SetQuantity(int available, int required)
-    {
+        ItemClass = itemClass;
         Label.Text = $"{available} / {required}";
         Label.Color = available >= required ? validColor : invalidColor;
+        Sprite.SetSpriteImmediately(itemClass.GetIconName());
     }
 
     public void SetEmpty()
     {
         Label.Text = "";
+        ItemClass = null;
         Sprite.SetSpriteImmediately(null);
     }
 
@@ -55,5 +55,32 @@ public class XUiC_EBRMaterialEntry : XUiController
         }
 
         return false;
+    }
+
+    public override bool GetBindingValueInternal(ref string _value, string _bindingName)
+    {
+        switch (_bindingName)
+        {
+            case "tooltip":
+                _value = ItemClass?.GetLocalizedItemName();
+                return true;
+
+            default:
+                return base.GetBindingValueInternal(ref _value, _bindingName);
+        }
+    }
+
+    public override void OnHovered(bool _isOver)
+    {
+        var background = GetChildById("background").ViewComponent as XUiV_Sprite;
+
+        if (_isOver)
+        {
+            background.SetColorImmediately(new Color32(96, 96, 96, byte.MaxValue));
+        }
+        else
+        {
+            background.SetColorImmediately(new Color32(64, 64, 64, byte.MaxValue));
+        }
     }
 }
