@@ -3,12 +3,11 @@ using UnityEngine;
 public class XUiC_EBRMaterialEntry : XUiController
 {
     private static Color validColor = Color.green;
-
     private static Color invalidColor = Color.red;
 
     private XUiV_Label Label { get; set; }
-
     private XUiV_Sprite Sprite { get; set; }
+    private XUiV_Sprite Background { get; set; }
 
     public override void Init()
     {
@@ -16,9 +15,11 @@ public class XUiC_EBRMaterialEntry : XUiController
 
         Label = GetChildById("label").viewComponent as XUiV_Label;
         Sprite = GetChildById("icon").viewComponent as XUiV_Sprite;
+        Background = GetChildById("background").ViewComponent as XUiV_Sprite;
 
         EBRUtils.Assert(Label != null);
         EBRUtils.Assert(Sprite != null);
+        EBRUtils.Assert(Background != null);
     }
 
     public void SetMaterial(ItemClass itemClass, int available, int required)
@@ -57,15 +58,13 @@ public class XUiC_EBRMaterialEntry : XUiController
 
     public override void OnHovered(bool _isOver)
     {
-        var background = GetChildById("background").ViewComponent as XUiV_Sprite;
-
         if (_isOver)
         {
-            background.SetColorImmediately(new Color32(96, 96, 96, byte.MaxValue));
+            Background?.SetColorImmediately(new Color32(96, 96, 96, byte.MaxValue));
         }
         else
         {
-            background.SetColorImmediately(new Color32(64, 64, 64, byte.MaxValue));
+            Background?.SetColorImmediately(new Color32(64, 64, 64, byte.MaxValue));
         }
     }
 }
