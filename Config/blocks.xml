@@ -9,7 +9,7 @@
             <property name="DisplayInfo" value="Custom" />
             <property name="CreativeMode" value="Player" />
             <property name="DisplayType" value="blockHardened" />
-            <property name="DescriptionKey" value="efficientBaseRepairDesc" />
+            <property name="DescriptionKey" value="ebrBlockDesc" />
             <property name="Stacknumber" value="10" />
             <property name="Material" value="Mmetal_hard" />
             <property name="Shape" value="ModelEntity" />

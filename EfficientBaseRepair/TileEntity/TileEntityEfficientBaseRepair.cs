@@ -12,8 +12,8 @@ public class TEFeatureEBR : TEFeatureStorage
 	private static readonly Logging.Logger logger = Logging.CreateLogger<TEFeatureEBR>();
 
 	private const string propAmmoGasCan = "ammoGasCan";
-	private const string TURN_ON_CMD = "EfficientBaseRepairTurnOn";
-	private const string TURN_OFF_CMD = "EfficientBaseRepairTurnOff";
+	private const string propTurnOn = "turnOn";
+	private const string propTurnOff = "turnOff";
 	private const float tickDuration_s = 2f;
 
 	public int DamagedBlockCount { get; private set; }
@@ -898,11 +898,11 @@ public class TEFeatureEBR : TEFeatureStorage
 	{
 		if (BloodMoonActive(GameManager.Instance.World))
 		{
-			GameManager.ShowTooltip(_player, Localization.Get("EfficientBaseRepairBloodMoonDenied"), string.Empty, "ui_denied");
+			GameManager.ShowTooltip(_player, Localization.Get("ebrBloodMoonDenied"), string.Empty, "ui_denied");
 			return false;
 		}
 
-		bool forceRefresh = _commandName == TURN_ON_CMD;
+		bool forceRefresh = _commandName == propTurnOn;
 
 		Switch(forceRefresh);
 
@@ -1067,8 +1067,8 @@ public class TEFeatureEBR : TEFeatureStorage
 
 		switch (stringCommand)
 		{
-			case TURN_ON_CMD:
-			case TURN_OFF_CMD:
+			case propTurnOn:
+			case propTurnOff:
 				return ActivateEBR(stringCommand, _player);
 
 			// case "take":
@@ -1098,7 +1098,7 @@ public class TEFeatureEBR : TEFeatureStorage
 	{
 		base.InitBlockActivationCommands(_addCallback);
 
-		string cmd_activate = IsOn ? TURN_OFF_CMD : TURN_ON_CMD;
+		string cmd_activate = IsOn ? propTurnOff : propTurnOn;
 
 		// return new BlockActivationCommand[6]
 		// {
