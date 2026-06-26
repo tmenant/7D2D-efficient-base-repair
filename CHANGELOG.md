@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 - UI: Configuration of the action buttons
 - UI: Increased default loot storage size to 8x7 grid
+- UI: Set material color to yellow when 0 < available < required
 - ModConfig: Moved `lootSize` setting from `ModConfig.xml` to [loot.xml](./Config/Loot.xml)
 
 ### Removed

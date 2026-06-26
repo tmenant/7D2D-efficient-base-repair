@@ -9,9 +9,7 @@
                 disabled_font_color="[disabledLabelColor]"
                 enabled_font_color="[labelColor]"
                 sound="[recipe_click]"
-                sound_play_on_hover="[default_hover]"
-                valid_materials_color="[green]"
-                invalid_materials_color="[red]">
+                sound_play_on_hover="[default_hover]">
 
                 <sprite depth="2" name="backgroundMain" pos="0,3" width="260" height="49" color="[black]" type="sliced" />
                 <sprite depth="3" name="background" width="254" height="44" pos="3,0" color="[darkGrey]" type="sliced" />

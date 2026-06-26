@@ -2,8 +2,9 @@ using UnityEngine;
 
 public class XUiC_EBRMaterialEntry : XUiController
 {
-    private static Color validColor = Color.green;
-    private static Color invalidColor = Color.red;
+    private static Color colorEnought = Color.green;
+    private static Color colorMissing = Color.yellow;
+    private static Color colorEmpty = Color.red;
 
     private XUiV_Label Label { get; set; }
     private XUiV_Sprite Sprite { get; set; }
@@ -26,8 +27,22 @@ public class XUiC_EBRMaterialEntry : XUiController
     {
         ViewComponent.ToolTip = itemClass.GetLocalizedItemName();
         Label.Text = $"{available} / {required}";
-        Label.Color = available >= required ? validColor : invalidColor;
+        Label.Color = GetLabelColor(available, required);
         Sprite.SetSpriteImmediately(itemClass.GetIconName());
+    }
+
+    private Color GetLabelColor(int available, int required)
+    {
+        if (available >= required)
+        {
+            return colorEnought;
+        }
+        else if (available > 0)
+        {
+            return colorMissing;
+        }
+
+        return colorEmpty;
     }
 
     public void SetEmpty()
@@ -35,25 +50,6 @@ public class XUiC_EBRMaterialEntry : XUiController
         ViewComponent.ToolTip = null;
         Label.SetTextImmediately(null);
         Sprite.SetSpriteImmediately(null);
-    }
-
-    public override bool ParseAttribute(string name, string value)
-    {
-        if (base.ParseAttribute(name, value))
-            return true;
-
-        switch (name)
-        {
-            case "valid_materials_color":
-                validColor = StringParsers.ParseColor32(value);
-                return true;
-
-            case "invalid_materials_color":
-                invalidColor = StringParsers.ParseColor32(value);
-                return true;
-        }
-
-        return false;
     }
 
     public override void OnHovered(bool _isOver)
