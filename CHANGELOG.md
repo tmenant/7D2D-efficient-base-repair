@@ -6,10 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-## [3.0.0] - 2026-06-17
+## [3.0.0] - 2026-06-28
 
 ### Added
 - Tooltip information when hovering the materials panel
+- Added new localization entries
 
 ### Fixed
 - Compatibility issues for v3.0b252
