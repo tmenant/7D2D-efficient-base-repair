@@ -4,59 +4,43 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using static Block;
+using Platform;
 
 
-public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TODO: Implement IPowered interface
+public class TEFeatureEBR : TEFeatureStorage
 {
-	private static readonly Logging.Logger logger = Logging.CreateLogger<TileEntityEfficientBaseRepair>();
-
-	public override TileEntityType GetTileEntityType() => Config.tileEntityType;
+	private static readonly Logging.Logger logger = Logging.CreateLogger<TEFeatureEBR>();
 
 	private const string propAmmoGasCan = "ammoGasCan";
-
+	private const string propTurnOn = "turnOn";
+	private const string propTurnOff = "turnOff";
 	private const float tickDuration_s = 2f;
 
 	public int DamagedBlockCount { get; private set; }
-
 	public int UpgradableBlockCount { get; private set; }
-
 	public int VisitedBlocksCount { get; private set; }
-
 	public int BfsIterationsCount { get; private set; }
-
 	public int TotalDamagesCount { get; private set; }
-
 	public int ElapsedTicksSinceLastRefresh { get; private set; }
-
 	public bool IsOn { get; private set; }
-
 	public bool UpgradeOn { get; private set; }
-
 	public bool IsPowered { get; private set; }
 
 	private bool forceFullRefresh;
-
 	private bool forceRefreshMaterials;
-
 	public bool UpgradeEnabled => Config.upgradeRate >= 0;
-
 	private string RepairSound(BlockValue block) => string.Format("ImpactSurface/metalhit{0}", block.Block.blockMaterial.SurfaceCategory);
-
 	private static World world => GameManager.Instance.World;
 
 	public readonly List<Vector3i> blocksToRepair = new List<Vector3i>();
-
 	public readonly List<Vector3i> blocksToUpgrade = new List<Vector3i>();
-
 	public readonly List<Vector3i> blocksToRefuel = new List<Vector3i>();
-
 	public readonly List<Vector3i> blocksToReload = new List<Vector3i>();
-
 	private readonly List<BlockChangeInfo> blockChangeInfos = new List<BlockChangeInfo>();
-
 	public readonly Dictionary<string, int> requiredMaterials = new Dictionary<string, int>();
 
-	public TileEntityEfficientBaseRepair(Chunk _chunk) : base(_chunk) { }
+	public TEFeatureLockable GetFeatureLockable() => Parent.GetSelfOrFeature<TEFeatureLockable>();
+	public PlatformUserIdentifierAbs Owner => GetFeatureLockable().GetOwner();
 
 	public string CalcRepairTime()
 	{
@@ -75,9 +59,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 	public Dictionary<string, int> ItemsToDict()
 	{
 		Dictionary<string, int> itemsDict = new Dictionary<string, int>();
-
-		if (items == null)
-			return itemsDict;
 
 		foreach (ItemStack stack in items)
 		{
@@ -187,7 +168,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 			return null;
 
 		var itemName = GetUpgradeItemName(block.Block);
-		var itemCount = upgradeProperties.GetInt("UpgradeBlock.ItemCount");
+		var itemCount = upgradeProperties.GetInt("UpgradeBlock", "ItemCount");
 
 		if (itemName is null || itemName == "" || itemCount <= 0)
 			return null;
@@ -231,9 +212,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		int neededItemCount = itemCount;
 		int totalTaken = 0;
 
-		for (int i = 0; i < this.items.Length; i++)
+		for (int i = 0; i < items?.Length; i++)
 		{
-			ItemStack stack = this.items[i];
+			ItemStack stack = items[i];
 
 			if (stack.IsEmpty())
 				continue;
@@ -330,9 +311,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		return (int)Mathf.Ceil(repairedDamages);
 	}
 
-	private void RepairBlock(int repairAmount, int clrIdx, BlockValue block, Vector3i pos, string audioClipName)
+	private void RepairBlock(int repairAmount, BlockValue block, Vector3i pos, string audioClipName)
 	{
-		block.Block.DamageBlock(GameManager.Instance.World, clrIdx, pos, block, -repairAmount, 0);
+		block.Block.DamageBlock(GameManager.Instance.World, pos, block, -repairAmount, 0);
 
 		if (!Config.playRepairSound || audioClipName == string.Empty)
 			return;
@@ -358,7 +339,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 		TotalDamagesCount -= repairableDamages;
 
-		RepairBlock(repairableDamages, chunk.ClrIdx, block, pos, RepairSound(block));
+		RepairBlock(repairableDamages, block, pos, RepairSound(block));
 
 		return repairableDamages;
 	}
@@ -395,13 +376,12 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		BlockValue currentBlock = world.GetBlock(pos);
 		Vector3i localPos = World.toBlock(pos);
 
-		RepairBlock(1, chunk.ClrIdx, currentBlock, pos, Config.upgradeSound);
+		RepairBlock(1, currentBlock, pos, Config.upgradeSound);
 		SetBlockUpgradable(pos);
 
 		if (Config.keepPaintAfterUpgrade)
 		{
 			blockChangeInfos.Add(new BlockChangeInfo(
-				chunk.ClrIdx,
 				pos,
 				chunk.GetBlock(localPos.x, localPos.y, localPos.z),
 				chunk.GetDensity(localPos.x, localPos.y, localPos.z),
@@ -414,20 +394,20 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 	private string GetUpgradeItemName(Block block)
 	{
-		// NOTE: copied from ItemActionRepair.GetUpgradeItemName()
+		// See ItemActionRepair.GetUpgradeItemName()
 
-		string text = block.Properties.Values["UpgradeBlock.Item"];
+		string text = block.Properties.GetString("UpgradeBlock", "Item");
+
 		if (text != null && text.Length == 1 && text[0] == 'r')
 		{
 			text = block.RepairItems[0].ItemName;
 		}
-
 		return text;
 	}
 
 	private bool CanUpgradeBlock(BlockValue block)
 	{
-		return block.Block.Properties.Values.ContainsKey("UpgradeBlock.UpgradeHitCount");
+		return block.Block.Properties.GetString("UpgradeBlock", "UpgradeHitCount") != null;
 	}
 
 	private bool CanRefuelBlock(TileEntity te)
@@ -439,7 +419,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 			return false;
 
 		// don't handle tileEntities which don't belong to the efficientBaseRepair block owner
-		if (tileEntity.ownerID != null && !tileEntity.ownerID.Equals(this.ownerID))
+		if (tileEntity.ownerID != null && !tileEntity.ownerID.Equals(Owner))
 			return false;
 
 		return tileEntity.CurrentFuel < tileEntity.MaxFuel;
@@ -451,7 +431,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 			return false;
 
 		// don't handle tileEntities which don't belong to the efficientBaseRepair block owner
-		if (tileEntity.ownerID != null && !tileEntity.ownerID.Equals(this.ownerID))
+		if (tileEntity.ownerID != null && !tileEntity.ownerID.Equals(Owner))
 			return false;
 
 		foreach (var itemStack in tileEntity.ItemSlots)
@@ -545,7 +525,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 	public void ForceRefresh()
 	{
 		forceFullRefresh = true;
-		setModified();
+		SetModified();
 	}
 
 	private void RefreshStats()
@@ -665,22 +645,22 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		RefreshReloadItems();
 	}
 
-	public void Switch(bool forceRefresh_ = false)
+	public void Switch(bool forceRefresh = false)
 	{
-		if (forceRefresh_)
+		if (forceRefresh)
 			forceFullRefresh = true;
 
 		IsOn = !IsOn;
 
 		Manager.PlayInsidePlayerHead(IsOn ? "switch_up" : "switch_down");
-		setModified();
+		SetModified();
 	}
 
 	public void SwitchUpgrade()
 	{
 		UpgradeOn = !UpgradeOn;
 		forceRefreshMaterials = true;
-		setModified();
+		SetModified();
 	}
 
 	public bool BloodMoonActive(World _world)
@@ -914,14 +894,31 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		return wasModified;
 	}
 
-	public override void read(PooledBinaryReader _br, StreamModeRead _eStreamMode)
+	private bool ActivateEBR(string _commandName, EntityPlayerLocal _player)
 	{
-		base.read(_br, _eStreamMode);
+		if (BloodMoonActive(GameManager.Instance.World))
+		{
+			GameManager.ShowTooltip(_player, Localization.Get("ebrBloodMoonDenied"), string.Empty, "ui_denied");
+			return false;
+		}
+
+		bool forceRefresh = _commandName == propTurnOn;
+
+		Switch(forceRefresh);
+
+		return true;
+	}
+
+	// OVERRIDE API
+	public override void Read(PooledBinaryReader _br, TileEntity.StreamModeRead _eStreamMode)
+	{
+		base.Read(_br, _eStreamMode);
+
 		IsOn = _br.ReadBoolean();
 		UpgradeOn = _br.ReadBoolean();
 		IsPowered = _br.ReadBoolean();
 
-		if (_eStreamMode == StreamModeRead.Persistency)
+		if (_eStreamMode == TileEntity.StreamModeRead.Persistency)
 			return;
 
 		forceRefreshMaterials = _br.ReadBoolean();
@@ -950,6 +947,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		// NOTE: reading again items allows to bypass the bUserAccessing condition from base-classes
 		// -> allows the TileEntity to take items from containers, even if the user is accessing the container
 		// -> /!\ may cause unknown issues on concurency access to the container
+
 		int itemsCount = _br.ReadInt32();
 		if (itemsCount > 0)
 		{
@@ -959,7 +957,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 			}
 		}
 
-		if (_eStreamMode == StreamModeRead.FromServer)
+		if (_eStreamMode == TileEntity.StreamModeRead.FromServer)
 			return;
 
 		// force refresh on server side if he receives the param forceRefresh=true from client.
@@ -967,23 +965,24 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		{
 			logger.Info("Refresh forced from server.");
 			RefreshStats();
-			setModified();
+			SetModified();
 		}
 		else if (forceRefreshMaterials)
 		{
 			RefreshMaterialsStats();
-			setModified();
+			SetModified();
 		}
 	}
 
-	public override void write(PooledBinaryWriter _bw, StreamModeWrite _eStreamMode)
+	public override void Write(PooledBinaryWriter _bw, TileEntity.StreamModeWrite _eStreamMode)
 	{
-		base.write(_bw, _eStreamMode);
+		base.Write(_bw, _eStreamMode);
+
 		_bw.Write(IsOn);
 		_bw.Write(UpgradeOn);
 		_bw.Write(IsPowered);
 
-		if (_eStreamMode == StreamModeWrite.Persistency)
+		if (_eStreamMode == TileEntity.StreamModeWrite.Persistency)
 			return;
 
 		_bw.Write(forceRefreshMaterials);
@@ -1003,12 +1002,13 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 		// see the note in the read method upper
 		_bw.Write(items.Length);
+
 		foreach (ItemStack stack in items)
 		{
 			stack.Clone().Write(_bw);
 		}
 
-		if (_eStreamMode == StreamModeWrite.ToServer)
+		if (_eStreamMode == TileEntity.StreamModeWrite.ToServer)
 			return;
 
 		// trigger forceRefresh=true in single player mode
@@ -1050,14 +1050,104 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 		if (wasModified)
 		{
-			setModified();
+			SetModified();
 		}
 		else if (Config.autoTurnOff)
 		{
 			IsOn = false;
-			setModified();
+			SetModified();
 		}
 
 		ElapsedTicksSinceLastRefresh++;
+	}
+
+	public override bool OnBlockActivated(ReadOnlySpan<char> _commandName, WorldBase _world, Vector3i _blockPos, BlockValue _blockValue, EntityPlayerLocal _player)
+	{
+		string stringCommand = new string(_commandName);
+
+		switch (stringCommand)
+		{
+			case propTurnOn:
+			case propTurnOff:
+				return ActivateEBR(stringCommand, _player);
+
+			// case "take":
+			// 	TakeItemWithTimer(_blockPos, _blockValue, _player, takeDelay);
+			// 	return true;
+
+			default:
+				break;
+		}
+
+		return base.OnBlockActivated(_commandName, _world, _blockPos, _blockValue, _player);
+	}
+
+	public override void OnAdded(Vector3i _blockPos, BlockValue _blockValue)
+	{
+		base.OnAdded(_blockPos, _blockValue);
+
+		TEFeatureLockable lockable = GetFeatureLockable();
+
+		if (lockable.GetOwner() == null)
+		{
+			lockable.SetOwner(PlatformManager.InternalLocalUserIdentifier);
+		}
+	}
+
+	public override void InitBlockActivationCommands(Action<BlockActivationCommand, TileEntityComposite.EBlockCommandOrder, TileEntityFeatureData> _addCallback)
+	{
+		base.InitBlockActivationCommands(_addCallback);
+
+		string cmd_activate = IsOn ? propTurnOff : propTurnOn;
+
+		// return new BlockActivationCommand[6]
+		// {
+		//     new BlockActivationCommand("Search", "search", true),
+		//     new BlockActivationCommand("lock", "lock", !is_locked),
+		//     new BlockActivationCommand("unlock", "unlock", is_locked),
+		//     new BlockActivationCommand("keypad", "keypad", true),
+		//     new BlockActivationCommand("take", "hand", true),
+		//     new BlockActivationCommand(cmd_activate, "electric_switch", true, tileEntity.IsOn),
+		// };
+
+		_addCallback(new BlockActivationCommand(cmd_activate, "electric_switch", true, IsOn), TileEntityComposite.EBlockCommandOrder.Normal, base.FeatureData);
+	}
+
+	public override string GetActivationText(WorldBase _world, Vector3i _blockPos, BlockValue _blockValue, EntityAlive _entityFocusing, string _activateHotkeyMarkup, string _focusedTileEntityName)
+	{
+		return Localization.Get("useWorkstation");
+	}
+
+	public override void OnLockedLocal(bool _success, ILockContext _context, ushort _channel)
+	{
+		ShowUI(_success);
+	}
+
+	public new void ShowUI(bool _lockGranted)
+	{
+		LocalPlayerUI uIForPrimaryPlayer = LocalPlayerUI.GetUIForPrimaryPlayer();
+		if (!_lockGranted)
+		{
+			GameManager.ShowTooltip(uIForPrimaryPlayer.entityPlayer, Localization.Get("ttNoInteractItem"), string.Empty, "ui_denied");
+			return;
+		}
+
+		XUiC_EfficientBaseRepair.Open(uIForPrimaryPlayer, this);
+
+		LootContainer lootContainer = LootContainer.GetLootContainer(lootListName);
+		if (lootContainer != null && uIForPrimaryPlayer.entityPlayer != null)
+		{
+			lootContainer.ExecuteBuffActions(uIForPrimaryPlayer.entityPlayer.entityId, uIForPrimaryPlayer.entityPlayer);
+		}
+
+		BlockValue block = GameManager.Instance.World.GetBlock(ToWorldPos());
+
+		if (!GameManager.Instance.World.IsEditor() && !bTouched)
+		{
+			EntityPlayerLocal entityPlayer = uIForPrimaryPlayer.entityPlayer;
+			entityPlayer.MinEventContext.TileEntity = this;
+			entityPlayer.MinEventContext.BlockValue = block;
+			entityPlayer.FireEvent(MinEventTypes.onSelfOpenLootContainer);
+		}
 	}
 }

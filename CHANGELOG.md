@@ -6,7 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-## [2.1.2] - 2026-14-01
+## [3.0.0] - 2026-06-17
+
+### Added
+- Tooltip information when hovering the materials panel
+
+### Fixed
+- Compatibility issues for v3.0b252
+
+### Changed
+- UI: Configuration of the action buttons
+- UI: Increased default loot storage size to 8x7 grid
+- UI: Set material color to yellow when 0 < available < required
+- ModConfig: Moved `lootSize` setting from `ModConfig.xml` to [loot.xml](./Config/Loot.xml)
+
+### Removed
+- UI: The `iterations` stat from the stats panel (internal info used for debugging)
+
+## [2.1.2] - 2026-01-14
 
 ### Fixed
 - Fixed invalid path error for dedicated servers trying to get ModConfig.xml
@@ -170,6 +187,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 
 [unreleased]: https://github.com/tmenant/7D2D-efficient-base-repair/compare/master...unreleased
+[3.0.0]: https://github.com/tmenant/7D2D-efficient-base-repair/compare/2.1.2...3.0.0
 [2.1.2]: https://github.com/tmenant/7D2D-efficient-base-repair/compare/2.1.1...2.1.2
 [2.1.1]: https://github.com/tmenant/7D2D-efficient-base-repair/compare/2.1.0...2.1.1
 [2.1.0]: https://github.com/tmenant/7D2D-efficient-base-repair/compare/2.0.2...2.1.0

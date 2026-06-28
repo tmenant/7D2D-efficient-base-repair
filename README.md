@@ -57,7 +57,6 @@ The system's behavior is entirely configurable via [ModConfig.xml](./ModConfig.x
 | `activeDuringBloodMoon` | Enables or suspends system operations during Blood Moon events. |
 | `autoTurnOff` | Logic-gate: automatically shuts down the system when no maintenance tasks remain. |
 | `keepPaintAfterUpgrade` | Ensures texture/paint data persistence during block state transitions. |
-| `lootSize` | Defines the dimensions (columns, rows) of the UI inventory grid. |
 | `upgradeSound` | Audio asset identifier triggered upon successful block upgrade cycles. |
 | `turnOnAfterReload` | Turn on blocks after auto reloading if they were turned off. |
 | `turnOnAfterRefuel` | Turn on blocks after auto refueling if they were turned off. |

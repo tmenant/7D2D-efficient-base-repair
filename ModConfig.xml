@@ -10,7 +10,6 @@
     <property name="activeDuringBloodMoon" value="false" />     <!-- Set to true to enable the auto repair during the blood moon-->
     <property name="autoTurnOff" value="true" />                <!-- Auto turn off if no more blocks can be repaired -->
     <property name="keepPaintAfterUpgrade" value="true" />      <!-- If enabled, the upgraded block will keep his original paint, else his texture will be set to the upgrade block texture -->
-    <property name="lootSize" value="6,5" />                    <!-- Number of columns of the loot container -->
     <property name="upgradeSound" value="nailgun_fire" />       <!-- The sound played when a block is upgraded -->
     <property name="turnOnAfterReload" value="true" />          <!-- Turn on blocks after auto reloading if they were turned off -->
     <property name="turnOnAfterRefuel" value="true" />          <!-- Turn on blocks after auto refueling if they were turned off -->

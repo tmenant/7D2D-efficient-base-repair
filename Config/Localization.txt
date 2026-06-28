@@ -1,4 +1,0 @@
-Key,File,Type,english,Context / Alternate Text,german,spanish,french,italian,japanese,koreana,polish,brazilian,russian,turkish,schinese,tchinese
-blockcommand_EfficientBaseRepairTurnOff,UI,XUI,Turn Off,,Ausschalten,Desactivar,Désactiver,Spegni,オフにする,끄기,Wył.,Desligar,Выключить,Kapat,关闭,關掉
-blockcommand_EfficientBaseRepairTurnOn,UI,XUI,Turn On,,Einschalten,Activar,Activer,Accendi,オンにする,켜기,Wł.,Ligar,Включить,Aç,打开,打開
-efficientBaseRepairDesc,blocks,Workstation,Useful to efficiently repair you base. Put required materials inside and turn on the block.\n\nRepair with a Repair Kit.,,,,Utile pour réparer votre base. Mettez les matériaux nécessaire à l'interieur puis activez le block.\n\nPeut être réparé avec un kit de réparation,,,,,,,,,

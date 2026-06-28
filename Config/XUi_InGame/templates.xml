@@ -1,0 +1,22 @@
+<configs>
+    <append xpath="/templates">
+
+        <ebr_material_entry>
+            <rect
+                depth="12"
+                style="press, hover, scroll"
+                controller="EBRMaterialEntry, EfficientBaseRepair"
+                disabled_font_color="[disabledLabelColor]"
+                enabled_font_color="[labelColor]"
+                sound="[recipe_click]"
+                sound_play_on_hover="[default_hover]">
+
+                <sprite depth="2" name="backgroundMain" pos="0,3" width="260" height="49" color="[black]" type="sliced" />
+                <sprite depth="3" name="background" width="254" height="44" pos="3,0" color="[darkGrey]" type="sliced" />
+                <sprite depth="4" name="icon" atlas="ItemIconAtlas" sprite="{iconName}" size="40,40" pos="5,-2" foregroundlayer="true" />
+                <label depth="8" name="label" pos="60,-12" width="150" height="30" font_size="24" />
+            </rect>
+        </ebr_material_entry>
+
+    </append>
+</configs>

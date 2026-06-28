@@ -1,0 +1,12 @@
+<configs>
+    <append xpath="/xui">
+        <window_group name="EfficientBaseRepair" controller="XUiC_EfficientBaseRepair, EfficientBaseRepair" open_backpack_on_open="true" close_compass_on_open="true">
+            <window name="craftingInfoPanel" />
+            <window name="windowNonPagingHeader" />
+            <window name="windowEfficientBaseRepairStats" />
+            <window name="windowEfficientBaseRepairMaterials" />
+            <window name="windowLooting" />
+        </window_group>
+
+    </append>
+</configs>

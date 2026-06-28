@@ -1,0 +1,7 @@
+<config>
+    <append xpath="/lootcontainers">
+        <lootcontainer name="EBRStorage" count="0" size="8,7" sound_open="UseActions/crate_wood_open" sound_close="UseActions/crate_wood_close" loot_quality_template="qualBaseTemplate">
+            <item name="cobweb" count="0" />
+        </lootcontainer>
+    </append>
+</config>

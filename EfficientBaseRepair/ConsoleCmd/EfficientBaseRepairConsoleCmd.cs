@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
 {
-    private static readonly Logging.Logger logger = Logging.CreateLogger("EfficientBaseRepairConsoleCmd");
+    private static readonly Logging.Logger logger = Logging.CreateLogger("EBRConsoleCmd");
 
     public static readonly List<string> activeBoxNames = new List<string>();
 
@@ -28,6 +27,7 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
             - setfuel <value>: set the given fuel amount into the opened powerSource item. If no value is given, a random value is choosen.
             - getconfig <name>: show the value of the given ebr parameter. The name is case-sensitive and must be defined in ModConfig.xml, ex: `get repairRate`
             - setconfig <name> <value>: set the value of the given ebr parameter, ex: `set repairRate 100`
+            - setdamage, sd: set a given damage value to all blocks inside the selection box
         ";
     }
 
@@ -40,9 +40,9 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
         {
             sbm.CreateCategory(
                 _name: selectionBoxCategory,
-                _colSelected: SelectionBoxManager.ColSelectionActive,
-                _colUnselected: SelectionBoxManager.ColSelectionInactive,
-                _colFaceSelected: SelectionBoxManager.ColSelectionFaceSel,
+                _colSelected: new UnityEngine.Color(0f, 0f, 1f, 0.5f),
+                _colUnselected: new UnityEngine.Color(0f, 0f, 1f, 0.5f),
+                _colFaceSelected: new UnityEngine.Color(1f, 1f, 0f, 0.4f),
                 _bCollider: false,
                 _tag: null
             );
@@ -65,6 +65,47 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
         activeBoxNames.Add(boxName);
     }
 
+    private IEnumerable<Vector3i> GetSelectionBoxPositions()
+    {
+        var selection = BlockToolSelection.Instance;
+
+        var start = selection.m_selectionStartPoint;
+        var end = selection.m_SelectionEndPoint;
+
+        var dx = Math.Sign(end.x - start.x);
+        var dy = Math.Sign(end.y - start.y);
+        var dz = Math.Sign(end.z - start.z);
+
+        var position = Vector3i.zero;
+
+        int y = start.y;
+        while (true)
+        {
+            int x = start.x;
+            while (true)
+            {
+                int z = start.z;
+                while (true)
+                {
+                    position.x = x;
+                    position.y = y;
+                    position.z = z;
+
+                    yield return position;
+
+                    if (z == end.z) break;
+                    z += dz;
+                }
+                if (x == end.x) break;
+                x += dx;
+            }
+            if (y == end.y) break;
+            y += dy;
+        }
+
+        yield break;
+    }
+
     private void CmdIsChild()
     {
         var position = BlockToolSelection.Instance.m_selectionStartPoint;
@@ -80,7 +121,7 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
 
         SelectionBoxManager.Instance.Deactivate();
 
-        foreach (var pos in TileEntityEfficientBaseRepair.GetNeighbors(position, blockValue))
+        foreach (var pos in TEFeatureEBR.GetNeighbors(position, blockValue))
         {
             SelectBlock(pos);
         }
@@ -157,6 +198,35 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
         }
     }
 
+    private void CmdSetDamage(string[] args)
+    {
+        if (args.Length < 2)
+        {
+            throw new ArgumentException("missing argument: 'damage'");
+        }
+
+        if (!int.TryParse(args[1], out int damage))
+        {
+            throw new ArgumentException($"Invalid argument: '{args[0]}'. Integer value is required");
+        }
+
+        var blockChangeInfos = new List<BlockChangeInfo>();
+
+        foreach (var blockPos in GetSelectionBoxPositions())
+        {
+            var blockValue = GameManager.Instance.World.GetBlock(blockPos);
+            var maxDamage = blockValue.Block.MaxDamage;
+
+            if (!blockValue.isair)
+            {
+                blockValue.damage = Math.Clamp(maxDamage - damage, 0, maxDamage);
+                blockChangeInfos.Add(new BlockChangeInfo(blockPos, blockValue));
+            }
+        }
+
+        GameManager.Instance.World.SetBlocksRPC(blockChangeInfos);
+    }
+
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
     {
         var args = _params.ToArray();
@@ -199,6 +269,11 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
             case "getconfig":
             case "get":
                 CmdGetConfig(args);
+                break;
+
+            case "setdamage":
+            case "sd":
+                CmdSetDamage(args);
                 break;
 
             default:

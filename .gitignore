@@ -1,10 +1,10 @@
 /.vscode
 /.vs
-
 /ignore
 /build
-/obj
-/bin
+
+/**/obj
+/**/bin
 
 *.dll
 *.pdb

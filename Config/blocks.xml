@@ -3,13 +3,13 @@
 
         <block name="EfficientBaseRepair">
 
-            <property name="Class" value="BlockEfficientBaseRepair, EfficientBaseRepair" />
+            <property name="Class" value="CompositeTileEntity" />
             <property name="CustomIcon" value="cntHardenedChestSecure" />
             <property name="UnlockedBy" value="craftingRepairTools" />
             <property name="DisplayInfo" value="Custom" />
             <property name="CreativeMode" value="Player" />
             <property name="DisplayType" value="blockHardened" />
-            <property name="DescriptionKey" value="efficientBaseRepairDesc" />
+            <property name="DescriptionKey" value="ebrBlockDesc" />
             <property name="Stacknumber" value="10" />
             <property name="Material" value="Mmetal_hard" />
             <property name="Shape" value="ModelEntity" />
@@ -21,7 +21,15 @@
             <property name="StartDamage" value="0" />
             <property name="PassThroughDamage" value="true" />
             <property name="TakeDelay" value="1" />
+
             <drop event="Fall" name="scrapMetalPile" count="1" prob="1" stick_chance="1" />
+
+            <property class="CompositeFeatures">
+                <property class="TEFeatureEBR">
+                    <property name="LootList" value="EBRStorage" />
+                </property>
+                <property class="TEFeatureLockable" />
+            </property>
 
             <property class="RepairItems">
                 <property name="resourceRepairKit" value="5" />

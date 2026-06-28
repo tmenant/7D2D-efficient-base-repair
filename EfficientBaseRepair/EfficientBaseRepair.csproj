@@ -14,13 +14,14 @@
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <nowarn>CS0169;CS0414</nowarn>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>.\build</OutputPath>
+    <OutputPath>..\build</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -29,7 +30,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>.\build</OutputPath>
+    <OutputPath>..\build</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -89,10 +90,10 @@
 
   </ItemGroup>
 
-  <!-- scripts -->
+  <!-- sources -->
   <ItemGroup>
-    <Compile Include=".\Scripts\**\*.cs" />
-    <Compile Include=".\Harmony\**\*.cs" />
+    <Compile Include="**\*.cs" />
+    <Compile Remove="obj\**\*.cs" />
   </ItemGroup>
 
   <PropertyGroup>
