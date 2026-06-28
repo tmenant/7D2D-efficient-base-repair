@@ -72,6 +72,12 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
         var start = selection.m_selectionStartPoint;
         var end = selection.m_SelectionEndPoint;
 
+        var dx = Math.Sign(end.x - start.x);
+        var dy = Math.Sign(end.y - start.y);
+        var dz = Math.Sign(end.z - start.z);
+
+        var position = Vector3i.zero;
+
         int y = start.y;
         while (true)
         {
@@ -81,16 +87,20 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
                 int z = start.z;
                 while (true)
                 {
-                    yield return new Vector3i(x, y, z);
+                    position.x = x;
+                    position.y = y;
+                    position.z = z;
+
+                    yield return position;
 
                     if (z == end.z) break;
-                    z += Math.Sign(end.z - start.z);
+                    z += dz;
                 }
                 if (x == end.x) break;
-                x += Math.Sign(end.x - start.x);
+                x += dx;
             }
             if (y == end.y) break;
-            y += Math.Sign(end.y - start.y);
+            y += dy;
         }
 
         yield break;
