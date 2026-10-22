@@ -91,7 +91,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	private void BtnRefresh_OnPress(XUiController _sender, int _mouseButton)
 	{
-		TileEntity.ForceRefresh();
+		TileEntity.RequestServerRefresh();
 		Manager.BroadcastPlay(RefreshSound);
 	}
 

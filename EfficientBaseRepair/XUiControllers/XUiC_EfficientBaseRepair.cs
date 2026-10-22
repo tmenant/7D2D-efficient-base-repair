@@ -72,7 +72,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 			return;
 		}
 
-		tileEntity.ForceRefresh();
+		tileEntity.RequestServerRefresh();
 
 		controller.SetTileEntity(tileEntity);
 

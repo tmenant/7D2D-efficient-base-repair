@@ -6,10 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-## [3.0.0] - 2026-06-17
+## [3.1.0] - 2026-10-22
+
+### Fixed
+- Fixed compatibility issues with V3.3
+- Fixed obsolete blocks in the testing prefab
+
+### Changed
+- Improved stats refresh requests between client and server
+
+## [3.0.0] - 2026-06-28
 
 ### Added
 - Tooltip information when hovering the materials panel
+- Added new localization entries
 
 ### Fixed
 - Compatibility issues for v3.0b252
@@ -187,6 +197,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 
 [unreleased]: https://github.com/tmenant/7D2D-efficient-base-repair/compare/master...unreleased
+[3.1.0]: https://github.com/tmenant/7D2D-efficient-base-repair/compare/3.0.0...3.1.0
 [3.0.0]: https://github.com/tmenant/7D2D-efficient-base-repair/compare/2.1.2...3.0.0
 [2.1.2]: https://github.com/tmenant/7D2D-efficient-base-repair/compare/2.1.1...2.1.2
 [2.1.1]: https://github.com/tmenant/7D2D-efficient-base-repair/compare/2.1.0...2.1.1

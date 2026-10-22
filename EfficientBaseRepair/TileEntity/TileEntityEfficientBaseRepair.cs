@@ -26,8 +26,6 @@ public class TEFeatureEBR : TEFeatureStorage
 	public bool UpgradeOn { get; private set; }
 	public bool IsPowered { get; private set; }
 
-	private bool forceFullRefresh;
-	private bool forceRefreshMaterials;
 	public bool UpgradeEnabled => Config.upgradeRate >= 0;
 	private string RepairSound(BlockValue block) => string.Format("ImpactSurface/metalhit{0}", block.Block.blockMaterial.SurfaceCategory);
 	private static World world => GameManager.Instance.World;
@@ -60,7 +58,7 @@ public class TEFeatureEBR : TEFeatureStorage
 	{
 		Dictionary<string, int> itemsDict = new Dictionary<string, int>();
 
-		foreach (ItemStack stack in items)
+		foreach (ItemStack stack in itemGrid.items)
 		{
 			if (stack.itemValue.ItemClass == null)
 				continue;
@@ -212,9 +210,9 @@ public class TEFeatureEBR : TEFeatureStorage
 		int neededItemCount = itemCount;
 		int totalTaken = 0;
 
-		for (int i = 0; i < items?.Length; i++)
+		for (int i = 0; i < itemGrid.items?.Length; i++)
 		{
-			ItemStack stack = items[i];
+			ItemStack stack = itemGrid.items[i];
 
 			if (stack.IsEmpty())
 				continue;
@@ -522,23 +520,30 @@ public class TEFeatureEBR : TEFeatureStorage
 		logger.Info($"visited_blocks  : {visited.Count}");
 	}
 
-	public void ForceRefresh()
+	public void RequestServerRefresh()
 	{
-		forceFullRefresh = true;
-		SetModified();
+		if (ConnectionManager.Instance.IsClient)
+		{
+			SingletonMonoBehaviour<ConnectionManager>.Instance.SendToServer(new NetPackageEBRServerRefresh().Setup(ToWorldPos()));
+		}
+		else
+		{
+			RefreshStats();
+		}
 	}
 
-	private void RefreshStats()
+	public void RefreshStats()
 	{
 		ElapsedTicksSinceLastRefresh = 0;
 		DamagedBlockCount = 0;
 		BfsIterationsCount = 0;
 		VisitedBlocksCount = 0;
 		TotalDamagesCount = 0;
-		forceFullRefresh = false;
 
 		AnalyseStructure(ToWorldPos());
 		RefreshMaterialsStats();
+
+		SetModified();
 	}
 
 	private void RefreshRepairItems()
@@ -636,7 +641,6 @@ public class TEFeatureEBR : TEFeatureStorage
 
 	private void RefreshMaterialsStats()
 	{
-		forceRefreshMaterials = false;
 		requiredMaterials.Clear();
 
 		RefreshRepairItems();
@@ -648,7 +652,9 @@ public class TEFeatureEBR : TEFeatureStorage
 	public void Switch(bool forceRefresh = false)
 	{
 		if (forceRefresh)
-			forceFullRefresh = true;
+		{
+			RequestServerRefresh();
+		}
 
 		IsOn = !IsOn;
 
@@ -659,8 +665,8 @@ public class TEFeatureEBR : TEFeatureStorage
 	public void SwitchUpgrade()
 	{
 		UpgradeOn = !UpgradeOn;
-		forceRefreshMaterials = true;
 		SetModified();
+		RequestServerRefresh();
 	}
 
 	public bool BloodMoonActive(World _world)
@@ -910,7 +916,7 @@ public class TEFeatureEBR : TEFeatureStorage
 	}
 
 	// OVERRIDE API
-	public override void Read(PooledBinaryReader _br, TileEntity.StreamModeRead _eStreamMode)
+	public override void Read(PooledBinaryReader _br, StreamModeRead _eStreamMode)
 	{
 		base.Read(_br, _eStreamMode);
 
@@ -918,11 +924,9 @@ public class TEFeatureEBR : TEFeatureStorage
 		UpgradeOn = _br.ReadBoolean();
 		IsPowered = _br.ReadBoolean();
 
-		if (_eStreamMode == TileEntity.StreamModeRead.Persistency)
+		if (_eStreamMode == StreamModeRead.Persistency)
 			return;
 
-		forceRefreshMaterials = _br.ReadBoolean();
-		forceFullRefresh = _br.ReadBoolean();
 		DamagedBlockCount = _br.ReadInt32();
 		TotalDamagesCount = _br.ReadInt32();
 		VisitedBlocksCount = _br.ReadInt32();
@@ -943,38 +947,9 @@ public class TEFeatureEBR : TEFeatureStorage
 				requiredMaterials[itemName] = itemCount;
 			}
 		}
-
-		// NOTE: reading again items allows to bypass the bUserAccessing condition from base-classes
-		// -> allows the TileEntity to take items from containers, even if the user is accessing the container
-		// -> /!\ may cause unknown issues on concurency access to the container
-
-		int itemsCount = _br.ReadInt32();
-		if (itemsCount > 0)
-		{
-			for (int i = 0; i < itemsCount; i++)
-			{
-				items[i].Read(_br);
-			}
-		}
-
-		if (_eStreamMode == TileEntity.StreamModeRead.FromServer)
-			return;
-
-		// force refresh on server side if he receives the param forceRefresh=true from client.
-		if (forceFullRefresh)
-		{
-			logger.Info("Refresh forced from server.");
-			RefreshStats();
-			SetModified();
-		}
-		else if (forceRefreshMaterials)
-		{
-			RefreshMaterialsStats();
-			SetModified();
-		}
 	}
 
-	public override void Write(PooledBinaryWriter _bw, TileEntity.StreamModeWrite _eStreamMode)
+	public override void Write(PooledBinaryWriter _bw, StreamModeWrite _eStreamMode)
 	{
 		base.Write(_bw, _eStreamMode);
 
@@ -982,11 +957,9 @@ public class TEFeatureEBR : TEFeatureStorage
 		_bw.Write(UpgradeOn);
 		_bw.Write(IsPowered);
 
-		if (_eStreamMode == TileEntity.StreamModeWrite.Persistency)
+		if (_eStreamMode == StreamModeWrite.Persistency)
 			return;
 
-		_bw.Write(forceRefreshMaterials);
-		_bw.Write(forceFullRefresh);
 		_bw.Write(DamagedBlockCount);
 		_bw.Write(TotalDamagesCount);
 		_bw.Write(VisitedBlocksCount);
@@ -998,29 +971,6 @@ public class TEFeatureEBR : TEFeatureStorage
 		{
 			_bw.Write(entry.Key);
 			_bw.Write(entry.Value);
-		}
-
-		// see the note in the read method upper
-		_bw.Write(items.Length);
-
-		foreach (ItemStack stack in items)
-		{
-			stack.Clone().Write(_bw);
-		}
-
-		if (_eStreamMode == TileEntity.StreamModeWrite.ToServer)
-			return;
-
-		// trigger forceRefresh=true in single player mode
-		// TODO: try with SingletonMonoBehaviour<ConnectionManager>.Instance.IsSinglePlayer
-		if (forceFullRefresh)
-		{
-			logger.Info("Refresh forced from Client.");
-			RefreshStats();
-		}
-		else if (forceRefreshMaterials)
-		{
-			RefreshMaterialsStats();
 		}
 	}
 
@@ -1118,18 +1068,13 @@ public class TEFeatureEBR : TEFeatureStorage
 		return Localization.Get("useWorkstation");
 	}
 
-	public override void OnLockedLocal(bool _success, ILockContext _context, ushort _channel)
-	{
-		ShowUI(_success);
-	}
-
-	public new void ShowUI(bool _lockGranted)
+	public override bool OnLockResponseLocal(bool _success, PooledBinaryReader _brServerContext, ushort _channel)
 	{
 		LocalPlayerUI uIForPrimaryPlayer = LocalPlayerUI.GetUIForPrimaryPlayer();
-		if (!_lockGranted)
+		if (!_success)
 		{
 			GameManager.ShowTooltip(uIForPrimaryPlayer.entityPlayer, Localization.Get("ttNoInteractItem"), string.Empty, "ui_denied");
-			return;
+			return false;
 		}
 
 		XUiC_EfficientBaseRepair.Open(uIForPrimaryPlayer, this);
@@ -1142,12 +1087,14 @@ public class TEFeatureEBR : TEFeatureStorage
 
 		BlockValue block = GameManager.Instance.World.GetBlock(ToWorldPos());
 
-		if (!GameManager.Instance.World.IsEditor() && !bTouched)
+		if (!GameManager.Instance.World.IsEditor())
 		{
 			EntityPlayerLocal entityPlayer = uIForPrimaryPlayer.entityPlayer;
 			entityPlayer.MinEventContext.TileEntity = this;
 			entityPlayer.MinEventContext.BlockValue = block;
 			entityPlayer.FireEvent(MinEventTypes.onSelfOpenLootContainer);
 		}
+
+		return true;
 	}
 }
