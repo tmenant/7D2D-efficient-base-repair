@@ -36,7 +36,7 @@ public class NetPackageEBRServerRefresh : NetPackage
         {
             var tileEntity = world.GetTileEntity(worldPos) as TileEntityComposite;
 
-            if (tileEntity.GetFeature<TEFeatureEBR>() is TEFeatureEBR ebrFeature)
+            if (tileEntity?.GetFeature<TEFeatureEBR>() is TEFeatureEBR ebrFeature)
             {
                 ebrFeature.RefreshStats();
             }
